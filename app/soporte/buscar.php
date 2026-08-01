@@ -125,10 +125,6 @@ require __DIR__ . '/../includes/header.php';
     <div class="module-hero-number">ATENCIÓN AL USUARIO</div>
 
     <h1>Búsqueda en el centro de soporte</h1>
-
-    <p>
-        Busca entre las guías, manuales y publicaciones del área de soporte.
-    </p>
 </section>
 
 <section class="module-layout">
@@ -136,10 +132,6 @@ require __DIR__ . '/../includes/header.php';
         <div class="section-heading">
             <div>
                 <h2>Buscar contenido</h2>
-
-                <p>
-                    Escribe el término que deseas localizar.
-                </p>
             </div>
         </div>
 
@@ -220,46 +212,6 @@ require __DIR__ . '/../includes/header.php';
             </div>
         </div>
     </article>
-
-    <aside class="module-status-card">
-        <h3>Información</h3>
-
-        <div class="status-list">
-            <div class="status-item">
-                <span class="status-circle">1</span>
-                Búsqueda sobre el índice de ayuda
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">2</span>
-                Resultado mostrado en la página
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">3</span>
-                Historial registrado por consulta
-            </div>
-        </div>
-
-        <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
-
-        <table class="info-table">
-            <tr>
-                <th>Método</th>
-                <td>GET</td>
-            </tr>
-
-            <tr>
-                <th>Parámetro</th>
-                <td><code>q</code></td>
-            </tr>
-
-            <tr>
-                <th>Almacenamiento</th>
-                <td>PostgreSQL</td>
-            </tr>
-        </table>
-    </aside>
 </section>
 
 <?php require __DIR__ . '/../includes/footer.php'; ?>

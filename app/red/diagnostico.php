@@ -98,11 +98,6 @@ require __DIR__ . '/../includes/header.php';
     <div class="module-hero-number">RED Y CONECTIVIDAD</div>
 
     <h1>Comprobación de disponibilidad</h1>
-
-    <p>
-        La aplicación ejecuta un ping sobre el destino indicado para
-        verificar su disponibilidad en la red.
-    </p>
 </section>
 
 <section class="module-layout">
@@ -167,51 +162,6 @@ require __DIR__ . '/../includes/header.php';
         <?php endif; ?>
     </article>
 
-    <aside class="module-status-card">
-        <h3>Proceso ejecutado</h3>
-
-        <div class="status-list">
-            <div class="status-item">
-                <span class="status-circle">1</span>
-
-                Entrada recibida por POST
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">2</span>
-
-                Preparación del comando
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">3</span>
-
-                Ejecución del proceso
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">4</span>
-
-                Resultado visible
-            </div>
-        </div>
-
-        <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
-
-        <h3>Contexto</h3>
-
-        <table class="info-table">
-            <tr>
-                <th>Servidor</th>
-                <td>Contenedor Linux</td>
-            </tr>
-
-            <tr>
-                <th>Plataforma</th>
-                <td>PHP 8.2</td>
-            </tr>
-        </table>
-    </aside>
 </section>
 
 <section class="panel-card" style="margin-top: 22px;">

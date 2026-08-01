@@ -181,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <p class="login-note">
-            Service Desk FIIS · Soporte y mesa de ayuda
+            Service Desk FIIS
         </p>
     </main>
 </div>

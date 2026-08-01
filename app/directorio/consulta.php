@@ -53,11 +53,6 @@ require __DIR__ . '/../includes/header.php';
     <div class="module-hero-number">DIRECTORIO</div>
 
     <h1>Consulta técnica del directorio</h1>
-
-    <p>
-        Endpoint orientado a procesos automatizados. La respuesta cambia
-        según el identificador consultado.
-    </p>
 </section>
 
 <section class="module-layout">
@@ -65,10 +60,6 @@ require __DIR__ . '/../includes/header.php';
         <div class="section-heading">
             <div>
                 <h2>Punto de consulta</h2>
-
-                <p>
-                    Servicio interno de consulta con un parámetro GET.
-                </p>
             </div>
         </div>
 
@@ -109,53 +100,6 @@ require __DIR__ . '/../includes/header.php';
             ) ?></pre>
         </div>
     </article>
-
-    <aside class="module-status-card">
-        <h3>Datos del endpoint</h3>
-
-        <table class="info-table">
-            <tr>
-                <th>Método</th>
-                <td>GET</td>
-            </tr>
-
-            <tr>
-                <th>Parámetro</th>
-                <td><code>id</code></td>
-            </tr>
-
-            <tr>
-                <th>Autenticación</th>
-                <td>Cookie de sesión</td>
-            </tr>
-        </table>
-
-        <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
-
-        <h3>Proceso de consulta</h3>
-
-        <div class="status-list">
-            <div class="status-item">
-                <span class="status-circle">1</span>
-                Recibir el parámetro
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">2</span>
-                Construir la consulta
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">3</span>
-                Consultar el motor
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">4</span>
-                Devolver la respuesta
-            </div>
-        </div>
-    </aside>
 </section>
 
 <?php require __DIR__ . '/../includes/footer.php'; ?>

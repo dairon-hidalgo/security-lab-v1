@@ -41,7 +41,6 @@ $tickets = $pdo->query(
 $pageTitle = 'Cola de tickets';
 $activeUrl = '/tickets';
 $pageHeading = 'Cola de tickets';
-$pageSubtitle = 'Solicitudes de la mesa de servicio';
 $environmentLabel = 'Mesa de servicio';
 
 require __DIR__ . '/../includes/header.php';
@@ -50,10 +49,6 @@ require __DIR__ . '/../includes/header.php';
 <section class="stats-grid">
     <?php foreach ($config['ticket_statuses'] as $key => $statusInfo): ?>
         <article class="stat-card">
-            <div class="stat-icon">
-                <?= icon($key === 'resuelto' ? 'check' : 'activity', 21) ?>
-            </div>
-
             <div class="stat-content">
                 <strong><?= $ticketTotals[$key] ?></strong>
                 <span><?= htmlspecialchars((string) $statusInfo['label']) ?></span>
@@ -66,10 +61,6 @@ require __DIR__ . '/../includes/header.php';
     <div class="section-heading">
         <div>
             <h2>Todas las solicitudes</h2>
-
-            <p>
-                Registro completo de la cola de tickets.
-            </p>
         </div>
     </div>
 

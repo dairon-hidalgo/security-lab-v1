@@ -202,11 +202,6 @@ require __DIR__ . '/../includes/header.php';
     <div class="module-hero-number">ATENCIÓN AL USUARIO</div>
 
     <h1>Comentarios del servicio</h1>
-
-    <p>
-        Espacio para el seguimiento de las solicitudes atendidas por la
-        mesa de servicio.
-    </p>
 </section>
 
 <section class="module-layout">
@@ -220,10 +215,6 @@ require __DIR__ . '/../includes/header.php';
         <div class="section-heading">
             <div>
                 <h2>Publicar comentario</h2>
-
-                <p>
-                    El contenido quedará almacenado y se mostrará en visitas futuras.
-                </p>
             </div>
         </div>
 
@@ -267,9 +258,6 @@ require __DIR__ . '/../includes/header.php';
                 <div>
                     <h2>Comentarios almacenados</h2>
 
-                    <p>
-                        Comentarios publicados por los usuarios del servicio.
-                    </p>
                 </div>
             </div>
 
@@ -306,46 +294,6 @@ require __DIR__ . '/../includes/header.php';
             </div>
         </div>
     </article>
-
-    <aside class="module-status-card">
-        <h3>Información</h3>
-
-        <div class="status-list">
-            <div class="status-item">
-                <span class="status-circle">1</span>
-                Publicación vía formulario
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">2</span>
-                Almacenamiento en PostgreSQL
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">3</span>
-                Moderación por administradores
-            </div>
-        </div>
-
-        <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
-
-        <table class="info-table">
-            <tr>
-                <th>Método</th>
-                <td>POST</td>
-            </tr>
-
-            <tr>
-                <th>Campo</th>
-                <td><code>content</code></td>
-            </tr>
-
-            <tr>
-                <th>Persistencia</th>
-                <td>PostgreSQL</td>
-            </tr>
-        </table>
-    </aside>
 </section>
 
 <?php require __DIR__ . '/../includes/footer.php'; ?>

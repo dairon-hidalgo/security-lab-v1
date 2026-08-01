@@ -23,7 +23,7 @@ return [
             'label' => 'Mesa de servicio',
             'items' => [
                 [
-                    'label' => 'Adjuntos de ticket',
+                    'label' => 'Tickets',
                     'url' => '/tickets/adjuntos',
                     'icon' => 'upload',
                 ],
@@ -35,12 +35,13 @@ return [
                 [
                     'label' => 'Comentarios',
                     'url' => '/soporte/comentarios',
-                    'icon' => 'code',
+                    'icon' => 'users',
                 ],
+
                 [
                     'label' => 'Anuncios',
                     'url' => '/soporte/anuncios',
-                    'icon' => 'eye',
+                    'icon' => 'triangle-alert',
                 ],
             ],
         ],
@@ -81,26 +82,6 @@ return [
                     'label' => 'Registro de accesos',
                     'url' => '/seguridad/accesos',
                     'icon' => 'lock',
-                ],
-            ],
-        ],
-        [
-            'label' => 'Administración',
-            'items' => [
-                [
-                    'label' => 'Reporte de incidencia',
-                    'url' => '/informes/reporte',
-                    'icon' => 'shield',
-                ],
-                [
-                    'label' => 'Sesión actual',
-                    'url' => '/sistema/sesion',
-                    'icon' => 'cookie',
-                ],
-                [
-                    'label' => 'Acerca del sistema',
-                    'url' => '/sistema/acerca',
-                    'icon' => 'clock',
                 ],
             ],
         ],

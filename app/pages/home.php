@@ -5,7 +5,4 @@
         Bienvenido al centro de documentación del Service Desk.
     </p>
 
-    <p>
-        Selecciona una sección para consultar información del sistema.
-    </p>
 </section>

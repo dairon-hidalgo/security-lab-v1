@@ -76,19 +76,10 @@ require __DIR__ . '/../includes/header.php';
     <div class="module-hero-number">AUDITORÍA DE ACCESO</div>
 
     <h1>Control de intentos de inicio de sesión</h1>
-
-    <p>
-        Vista consolidada de los eventos de autenticación registrados
-        por el formulario de acceso del sistema.
-    </p>
 </section>
 
 <section class="stats-grid">
     <article class="stat-card">
-        <div class="stat-icon">
-            <?= icon('activity', 21) ?>
-        </div>
-
         <div class="stat-content">
             <strong><?= $total ?></strong>
             <span>Intentos totales</span>
@@ -96,10 +87,6 @@ require __DIR__ . '/../includes/header.php';
     </article>
 
     <article class="stat-card">
-        <div class="stat-icon">
-            <?= icon('check', 21) ?>
-        </div>
-
         <div class="stat-content">
             <strong><?= $successful ?></strong>
             <span>Accesos correctos</span>
@@ -107,10 +94,6 @@ require __DIR__ . '/../includes/header.php';
     </article>
 
     <article class="stat-card">
-        <div class="stat-icon">
-            <?= icon('lock', 21) ?>
-        </div>
-
         <div class="stat-content">
             <strong><?= $failed ?></strong>
             <span>Intentos fallidos</span>
@@ -118,10 +101,6 @@ require __DIR__ . '/../includes/header.php';
     </article>
 
     <article class="stat-card">
-        <div class="stat-icon">
-            <?= icon('eye', 21) ?>
-        </div>
-
         <div class="stat-content">
             <strong><?= $failureRate ?>%</strong>
             <span>Tasa de fallos</span>
@@ -255,7 +234,7 @@ require __DIR__ . '/../includes/header.php';
 
         <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
 
-        <h3>Resumen técnico</h3>
+        <h3>Resumen</h3>
 
         <div class="status-list">
             <div class="status-item">

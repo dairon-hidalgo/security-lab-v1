@@ -41,11 +41,6 @@ require __DIR__ . '/../includes/header.php';
     <div class="module-hero-number">DIRECTORIO</div>
 
     <h1>Comprobación de registros</h1>
-
-    <p>
-        Permite confirmar si existe un registro en el directorio. La
-        interfaz solo informa el resultado lógico de la verificación.
-    </p>
 </section>
 
 <section class="module-layout">
@@ -54,9 +49,6 @@ require __DIR__ . '/../includes/header.php';
             <div>
                 <h2>Comprobar condición</h2>
 
-                <p>
-                    La respuesta solo informa verdadero o falso.
-                </p>
             </div>
         </div>
 
@@ -87,47 +79,12 @@ require __DIR__ . '/../includes/header.php';
                 style="margin-top: 22px;"
             >
                 <?= $exists
-                    ? 'Condición verdadera: existe al menos un registro.'
-                    : 'Condición falsa: no se encontró ningún registro.'
+                    ? 'Existe al menos un registro.'
+                    : 'No se encontró ningún registro.'
                 ?>
             </div>
         <?php endif; ?>
     </article>
-
-    <aside class="module-status-card">
-        <h3>Comportamiento</h3>
-
-        <div class="status-list">
-            <div class="status-item">
-                <span class="status-circle">1</span>
-                Entrada por parámetro GET
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">2</span>
-                Respuesta booleana
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">3</span>
-                Respuesta binaria
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">4</span>
-                Sin datos visibles
-            </div>
-        </div>
-
-        <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
-
-        <table class="info-table">
-            <tr>
-                <th>Parámetro</th>
-                <td><code>id</code></td>
-            </tr>
-        </table>
-    </aside>
 </section>
 
 <?php require __DIR__ . '/../includes/footer.php'; ?>

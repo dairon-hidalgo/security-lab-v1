@@ -35,7 +35,6 @@ $layoutSections = $layoutConfig['sections'] ?? [];
             <div class="sidebar-logo">FI</div>
             <div>
                 <strong>Service Desk FIIS</strong>
-                <span>Soporte y mesa de ayuda</span>
             </div>
         </div>
 

@@ -24,7 +24,6 @@ try {
 $pageTitle = 'Directorio de usuarios';
 $activeUrl = '/directorio/usuarios';
 $pageHeading = 'Directorio de usuarios';
-$pageSubtitle = 'Consulta de registros del directorio';
 $environmentLabel = 'Directorio';
 
 require __DIR__ . '/../includes/header.php';
@@ -38,13 +37,7 @@ require __DIR__ . '/../includes/header.php';
 
 <section class="module-hero">
     <div class="module-hero-number">DIRECTORIO</div>
-
     <h1>Consulta de usuarios</h1>
-
-    <p>
-        Permite localizar un registro del directorio a partir de su
-        identificador interno.
-    </p>
 </section>
 
 <section class="module-layout">
@@ -52,10 +45,6 @@ require __DIR__ . '/../includes/header.php';
         <div class="section-heading">
             <div>
                 <h2>Consulta por identificador</h2>
-
-                <p>
-                    Ingresa el identificador del registro a consultar.
-                </p>
             </div>
         </div>
 
@@ -75,8 +64,7 @@ require __DIR__ . '/../includes/header.php';
             </div>
 
             <button class="primary-button" type="submit">
-                Ejecutar consulta
-                <span>→</span>
+                Consultar
             </button>
         </form>
 
@@ -122,53 +110,6 @@ require __DIR__ . '/../includes/header.php';
             </div>
         </div>
     </article>
-
-    <aside class="module-status-card">
-        <h3>Flujo de la consulta</h3>
-
-        <div class="status-list">
-            <div class="status-item">
-                <span class="status-circle">1</span>
-                Parámetro recibido por GET
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">2</span>
-                Validación del parámetro
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">3</span>
-                Consulta al directorio
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">4</span>
-                Resultados visibles
-            </div>
-        </div>
-
-        <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
-
-        <h3>Datos de la consulta</h3>
-
-        <table class="info-table">
-            <tr>
-                <th>Método</th>
-                <td>GET</td>
-            </tr>
-
-            <tr>
-                <th>Parámetro</th>
-                <td><code>id</code></td>
-            </tr>
-
-            <tr>
-                <th>Motor</th>
-                <td>PostgreSQL 16</td>
-            </tr>
-        </table>
-    </aside>
 </section>
 
 <?php require __DIR__ . '/../includes/footer.php'; ?>

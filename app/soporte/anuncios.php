@@ -131,14 +131,7 @@ require __DIR__ . '/../includes/header.php';
 </div>
 
 <section class="module-hero">
-    <div class="module-hero-number">ATENCIÓN AL USUARIO</div>
-
     <h1>Visor de anuncios</h1>
-
-    <p>
-        Escribe el contenido del anuncio y obtén una vista previa antes de
-        publicarlo en el servicio.
-    </p>
 </section>
 
 <section class="module-layout">
@@ -146,10 +139,6 @@ require __DIR__ . '/../includes/header.php';
         <div class="section-heading">
             <div>
                 <h2>Vista previa del anuncio</h2>
-
-                <p>
-                    El contenido se procesa en el navegador.
-                </p>
             </div>
         </div>
 
@@ -188,47 +177,6 @@ require __DIR__ . '/../includes/header.php';
             aria-live="polite"
         ></div>
     </article>
-
-    <aside class="module-status-card">
-        <h3>Ejemplos de contenido</h3>
-
-        <div class="dom-example-list">
-            <button
-                type="button"
-                class="dom-example-button"
-                id="dom-example-text"
-            >
-                <strong>Texto simple</strong>
-                <code>Recordatorio de mantenimiento este fin de semana</code>
-            </button>
-
-            <button
-                type="button"
-                class="dom-example-button"
-                id="dom-example-html"
-            >
-                <strong>Encabezado y párrafo</strong>
-                <code>&lt;h3&gt;Aviso&lt;/h3&gt;&lt;p&gt;Detalle del aviso&lt;/p&gt;</code>
-            </button>
-        </div>
-
-        <div class="status-list" style="margin-top: 18px;">
-            <div class="status-item">
-                <span class="status-circle">1</span>
-                Escribir el contenido
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">2</span>
-                Vista previa en el navegador
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">3</span>
-                Publicación para el servicio
-            </div>
-        </div>
-    </aside>
 </section>
 
 <script>

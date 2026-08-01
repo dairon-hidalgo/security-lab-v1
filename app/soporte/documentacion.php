@@ -146,10 +146,6 @@ require __DIR__ . '/../includes/header.php';
     <div class="module-hero-number">DOCUMENTACIÓN</div>
 
     <h1>Visor de recursos internos</h1>
-
-    <p>
-        Permite visualizar secciones de ayuda y manuales del equipo de soporte.
-    </p>
 </section>
 
 <section class="module-layout">
@@ -157,10 +153,6 @@ require __DIR__ . '/../includes/header.php';
         <div class="section-heading">
             <div>
                 <h2>Seleccionar recurso</h2>
-
-                <p>
-                    Selecciona una sección de documentación para visualizarla.
-                </p>
             </div>
         </div>
 
@@ -211,53 +203,6 @@ require __DIR__ . '/../includes/header.php';
             </section>
         <?php endif; ?>
     </article>
-
-    <aside class="module-status-card">
-        <h3>Recursos disponibles</h3>
-
-        <div class="include-example-list">
-            <a
-                href="/soporte/documentacion?page=../pages/home.php"
-                class="include-example"
-            >
-                <strong>Página principal</strong>
-                <code>../pages/home.php</code>
-            </a>
-
-            <a
-                href="/soporte/documentacion?page=../pages/help.php"
-                class="include-example"
-            >
-                <strong>Centro de ayuda</strong>
-                <code>../pages/help.php</code>
-            </a>
-        </div>
-
-        <hr
-            style="
-                margin: 22px 0;
-                border: 0;
-                border-top: 1px solid var(--border);
-            "
-        >
-
-        <table class="info-table">
-            <tr>
-                <th>Origen</th>
-                <td><?= htmlspecialchars($resourceType) ?></td>
-            </tr>
-
-            <tr>
-                <th>Resultado</th>
-                <td>
-                    <?= $wasSuccessful
-                        ? 'Cargado'
-                        : 'No disponible'
-                    ?>
-                </td>
-            </tr>
-        </table>
-    </aside>
 </section>
 
 <section class="panel-card" style="margin-top: 22px;">
