@@ -10,7 +10,6 @@ $pageTitle = $pageTitle ?? 'Service Desk FIIS';
 $activeUrl = $activeUrl ?? '/panel';
 $pageHeading = $pageHeading ?? 'Service Desk FIIS';
 $pageSubtitle = $pageSubtitle ?? '';
-//$environmentLabel = $environmentLabel ?? 'Entorno de soporte';
 $pageBodyClass = $pageBodyClass ?? '';
 $mainClass = $mainClass ?? 'content';
 

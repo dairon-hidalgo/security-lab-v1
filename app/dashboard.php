@@ -24,14 +24,6 @@ foreach ($pdo->query(
     $ticketTotals[(string) $row['status']] = (int) $row['total'];
 }
 
-$userCount = (int) $pdo->query(
-    'SELECT COUNT(*) FROM users'
-)->fetchColumn();
-
-$accessAttempts = (int) $pdo->query(
-    'SELECT COUNT(*) FROM login_attempts'
-)->fetchColumn();
-
 $recentTickets = $pdo->query(
     'SELECT
         tickets.id,
@@ -46,7 +38,17 @@ $recentTickets = $pdo->query(
      LIMIT 6'
 )->fetchAll();
 
-$sections = $config['sections'];
+$ticketTotal = array_sum($ticketTotals);
+
+$recentAccesses = $pdo->query(
+    'SELECT
+        login_attempts.username,
+        login_attempts.was_successful,
+        login_attempts.attempted_at
+     FROM login_attempts
+     ORDER BY login_attempts.attempted_at DESC, login_attempts.id DESC
+     LIMIT 6'
+)->fetchAll();
 
 $pageTitle = 'Panel de control';
 $activeUrl = '/panel';
@@ -67,14 +69,17 @@ require __DIR__ . '/includes/header.php';
         </h2>
 
         <p>
-            Resumen de la operación de la mesa de servicio y acceso rápido
-            a las áreas del sistema.
+            Resumen de la operación de la mesa de servicio.
         </p>
     </div>
 </section>
 
 <section class="stats-grid">
     <article class="stat-card">
+        <div class="stat-icon">
+            <?= icon('activity', 21) ?>
+        </div>
+
         <div class="stat-content">
             <strong><?= $ticketTotals['abierto'] ?></strong>
             <span>Tickets abiertos</span>
@@ -82,6 +87,9 @@ require __DIR__ . '/includes/header.php';
     </article>
 
     <article class="stat-card">
+        <div class="stat-icon">
+            <?= icon('clock', 21) ?>
+        </div>
 
         <div class="stat-content">
             <strong><?= $ticketTotals['en proceso'] ?></strong>
@@ -90,65 +98,26 @@ require __DIR__ . '/includes/header.php';
     </article>
 
     <article class="stat-card">
-
+        <div class="stat-icon">
+            <?= icon('check', 21) ?>
+        </div>
 
         <div class="stat-content">
-            <strong><?= $userCount ?></strong>
-            <span>Usuarios registrados</span>
+            <strong><?= $ticketTotals['resuelto'] ?></strong>
+            <span>Tickets resueltos</span>
         </div>
     </article>
 
     <article class="stat-card">
+        <div class="stat-icon">
+            <?= icon('folder', 21) ?>
+        </div>
 
         <div class="stat-content">
-            <strong><?= $accessAttempts ?></strong>
-            <span>Intentos de acceso</span>
+            <strong><?= $ticketTotal ?></strong>
+            <span>Total de tickets</span>
         </div>
     </article>
-</section>
-
-<section id="quick-access">
-    <div class="section-heading">
-        <div>
-            <h2>Acceso rápido por área</h2>
-
-            <p>
-                Funcionalidades del servicio de soporte.
-            </p>
-        </div>
-    </div>
-
-    <div class="module-grid">
-        <?php foreach ($sections as $section): ?>
-            <?php foreach ($section['items'] as $item): ?>
-                <article class="module-card">
-                    <div class="module-card-top">
-                        <div class="module-icon">
-                            <?= icon((string) $item['icon'], 22) ?>
-                        </div>
-
-                        <div class="module-number">
-                            <?= htmlspecialchars(
-                                (string) $section['label']
-                            ) ?>
-                        </div>
-                    </div>
-
-                    <h3>
-                        <?= htmlspecialchars((string) $item['label']) ?>
-                    </h3>
-
-                    <a
-                        class="module-button"
-                        href="<?= htmlspecialchars((string) $item['url']) ?>"
-                    >
-                        Ingresar
-                        <span>→</span>
-                    </a>
-                </article>
-            <?php endforeach; ?>
-        <?php endforeach; ?>
-    </div>
 </section>
 
 <section class="panel-card" style="margin-top: 26px;">
@@ -215,6 +184,71 @@ require __DIR__ . '/includes/header.php';
 
                     <td>
                         <?= htmlspecialchars((string) $ticket['created_at']) ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="panel-card" style="margin-top: 26px;">
+    <div class="section-heading">
+        <div>
+            <h2>Actividad de accesos</h2>
+
+            <p>
+                Últimos intentos de inicio de sesión registrados.
+            </p>
+        </div>
+
+        <a class="text-link" href="/seguridad/accesos">
+            Ver registro completo
+            <span>→</span>
+        </a>
+    </div>
+
+    <div class="project-module-table-wrapper">
+        <table class="info-table">
+            <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Resultado</th>
+                <th>Fecha</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <?php if ($recentAccesses === []): ?>
+                <tr>
+                    <td colspan="3">Aún no hay accesos registrados.</td>
+                </tr>
+            <?php endif; ?>
+
+            <?php foreach ($recentAccesses as $access): ?>
+                <?php
+                $accessOk = pg_boolean($access['was_successful']);
+                ?>
+                <tr>
+                    <td>
+                        <code>
+                            <?= htmlspecialchars((string) $access['username']) ?>
+                        </code>
+                    </td>
+
+                    <td>
+                        <span class="status-badge <?= $accessOk
+                            ? 'status-implemented'
+                            : 'badge-failed'
+                        ?>">
+                            <?= $accessOk ? 'Correcto' : 'Fallido' ?>
+                        </span>
+                    </td>
+
+                    <td>
+                        <?= htmlspecialchars(
+                            (string) $access['attempted_at']
+                        ) ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

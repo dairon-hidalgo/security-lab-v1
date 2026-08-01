@@ -15,7 +15,7 @@ return [
                 [
                     'label' => 'Cola de tickets',
                     'url' => '/tickets',
-                    'icon' => 'activity',
+                    'icon' => 'clipboard',
                 ],
             ],
         ],
@@ -23,25 +23,25 @@ return [
             'label' => 'Mesa de servicio',
             'items' => [
                 [
-                    'label' => 'Tickets',
+                    'label' => 'Adjuntos de ticket',
                     'url' => '/tickets/adjuntos',
                     'icon' => 'upload',
                 ],
                 [
                     'label' => 'Documentación',
                     'url' => '/soporte/documentacion',
-                    'icon' => 'folder',
+                    'icon' => 'file-text',
                 ],
                 [
                     'label' => 'Comentarios',
                     'url' => '/soporte/comentarios',
-                    'icon' => 'users',
+                    'icon' => 'message',
                 ],
 
                 [
                     'label' => 'Anuncios',
                     'url' => '/soporte/anuncios',
-                    'icon' => 'triangle-alert',
+                    'icon' => 'bell',
                 ],
             ],
         ],
@@ -51,12 +51,12 @@ return [
                 [
                     'label' => 'Usuarios',
                     'url' => '/directorio/usuarios',
-                    'icon' => 'database',
+                    'icon' => 'users',
                 ],
                 [
                     'label' => 'Consulta de datos',
                     'url' => '/directorio/consulta',
-                    'icon' => 'activity',
+                    'icon' => 'database',
                 ],
                 [
                     'label' => 'Verificación',
@@ -76,7 +76,7 @@ return [
                 [
                     'label' => 'Búsqueda de ayuda',
                     'url' => '/soporte/buscar',
-                    'icon' => 'code',
+                    'icon' => 'search',
                 ],
                 [
                     'label' => 'Registro de accesos',

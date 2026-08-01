@@ -9,20 +9,6 @@ require_login();
 $pdo = db();
 $config = app_config();
 
-$ticketTotals = [
-    'abierto' => 0,
-    'en proceso' => 0,
-    'resuelto' => 0,
-];
-
-foreach ($pdo->query(
-    'SELECT status, COUNT(*) AS total
-     FROM tickets
-     GROUP BY status'
-)->fetchAll() as $row) {
-    $ticketTotals[(string) $row['status']] = (int) $row['total'];
-}
-
 $tickets = $pdo->query(
     'SELECT
         tickets.id,
@@ -46,22 +32,15 @@ $environmentLabel = 'Mesa de servicio';
 require __DIR__ . '/../includes/header.php';
 ?>
 
-<section class="stats-grid">
-    <?php foreach ($config['ticket_statuses'] as $key => $statusInfo): ?>
-        <article class="stat-card">
-            <div class="stat-content">
-                <strong><?= $ticketTotals[$key] ?></strong>
-                <span><?= htmlspecialchars((string) $statusInfo['label']) ?></span>
-            </div>
-        </article>
-    <?php endforeach; ?>
-</section>
-
-<section class="panel-card" style="margin-top: 26px;">
+<section class="panel-card">
     <div class="section-heading">
         <div>
             <h2>Todas las solicitudes</h2>
         </div>
+
+        <span class="status-badge status-open">
+            <?= count($tickets) ?> solicitudes
+        </span>
     </div>
 
     <div class="project-module-table-wrapper">

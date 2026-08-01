@@ -560,17 +560,6 @@ code {
     font-size: 13px;
 }
 
-.banner-badge {
-    display: inline-block;
-    margin-top: 12px;
-    padding: 6px 10px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface-soft);
-    color: var(--text-soft);
-    font-size: 12px;
-}
-
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -628,105 +617,6 @@ code {
     margin: 3px 0 0;
     color: var(--text-muted);
     font-size: 13px;
-}
-
-.module-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-}
-
-.module-card {
-    display: flex;
-    min-height: 210px;
-    flex-direction: column;
-    padding: 18px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-}
-
-.module-card:hover {
-    border-color: #b9c6d6;
-}
-
-.module-card-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.module-icon {
-    display: grid;
-    width: 40px;
-    height: 40px;
-    place-items: center;
-    border-radius: var(--radius);
-    background: var(--primary-soft);
-    color: var(--primary-dark);
-}
-
-.module-number {
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.module-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 14px 0 10px;
-}
-
-.module-tag {
-    display: inline-flex;
-    width: fit-content;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 8px;
-    margin: 14px 0 8px;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--surface-soft);
-    color: var(--text-soft);
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.module-card h3 {
-    margin: 0 0 7px;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.module-card p {
-    flex-grow: 1;
-    margin: 0 0 14px;
-    color: var(--text-soft);
-    font-size: 13px;
-}
-
-.module-button {
-    display: flex;
-    min-height: 36px;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    color: var(--primary);
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.module-button:hover {
-    border-color: var(--primary);
-    background: var(--primary-soft);
 }
 
 .status-badge {
@@ -1553,10 +1443,6 @@ code {
    ====================================================== */
 
 @media (max-width: 1180px) {
-    .module-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
     .stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -1671,7 +1557,6 @@ code {
 }
 
 @media (max-width: 650px) {
-    .module-grid,
     .stats-grid {
         grid-template-columns: 1fr;
     }
