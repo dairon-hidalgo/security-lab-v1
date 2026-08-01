@@ -63,7 +63,7 @@ return [
         'number' => '08',
         'title' => 'XSS Reflected',
         'risk' => 'Medio',
-        'status' => 'Pendiente',
+        'status' => 'Implementado',
         'owasp' => 'A03:2021 — Injection',
         'url' => '/xss-reflected.php',
     ],

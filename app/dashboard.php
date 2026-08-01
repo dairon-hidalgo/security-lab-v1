@@ -105,8 +105,8 @@ $modules = [
         'description' => 'Entrada recibida y reflejada directamente en la respuesta web.',
         'risk' => 'Medio',
         'risk_class' => 'risk-medium',
-        'status' => 'Pendiente',
-        'status_class' => 'status-pending',
+        'status' => 'Implementado',
+        'status_class' => 'status-implemented',
         'url' => '/xss-reflected.php',
     ],
     [
