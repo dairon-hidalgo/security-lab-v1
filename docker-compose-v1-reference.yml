@@ -1,0 +1,59 @@
+services:
+  db:
+    image: postgres:16
+    container_name: security-lab-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - security_lab_network
+
+  rfi-source:
+    image: nginx:alpine
+    container_name: security-lab-rfi-source
+    restart: unless-stopped
+    volumes:
+      - ./rfi-source:/usr/share/nginx/html:ro
+    networks:
+      - security_lab_network
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: security-lab-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${APP_PORT}:80"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./app:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+      rfi-source:
+        condition: service_started
+    networks:
+      - security_lab_network
+
+volumes:
+  postgres_data:
+
+networks:
+  security_lab_network:
+    driver: bridge
