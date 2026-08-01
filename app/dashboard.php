@@ -116,8 +116,8 @@ $modules = [
         'description' => 'Contenido almacenado y mostrado posteriormente a otros usuarios.',
         'risk' => 'Alto',
         'risk_class' => 'risk-high',
-        'status' => 'Pendiente',
-        'status_class' => 'status-pending',
+        'status' => 'Implementado',
+        'status_class' => 'status-implemented',
         'url' => '/xss-stored.php',
     ],
     [

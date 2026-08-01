@@ -71,7 +71,7 @@ return [
         'number' => '09',
         'title' => 'XSS Stored',
         'risk' => 'Alto',
-        'status' => 'Pendiente',
+        'status' => 'Implementado',
         'owasp' => 'A03:2021 — Injection',
         'url' => '/xss-stored.php',
     ],
