@@ -23,21 +23,34 @@ function current_user_initials(array $user): string
 }
 
 $userInitials = current_user_initials($user);
-$activeUrl = '/sqli.php';
-$activeIcon = 'database';
-$activeLabel = 'SQL Injection manual';
+$activeUrl = '/sqli-automated.php';
+$activeIcon = 'activity';
+$activeLabel = 'SQLi automatizada';
 
 $id = (string) ($_GET['id'] ?? '1');
-$results = [];
-$sqlExecuted = '';
+$responseText = 'Sin resultados.';
 $errorMessage = null;
 
 try {
     $pdo = db();
-    $sqlExecuted = "SELECT id, username, full_name, role FROM users WHERE id = $id ORDER BY id";
-    $results = $pdo->query($sqlExecuted)->fetchAll();
+    $sql = "SELECT id, username, full_name, role FROM users WHERE id = $id ORDER BY id";
+    $rows = $pdo->query($sql)->fetchAll();
+
+    if ($rows !== []) {
+        $lines = [];
+        foreach ($rows as $row) {
+            $lines[] = implode(' | ', [
+                (string) $row['id'],
+                (string) $row['username'],
+                (string) $row['full_name'],
+                (string) $row['role'],
+            ]);
+        }
+        $responseText = implode("\n", $lines);
+    }
 } catch (Throwable $exception) {
     $errorMessage = $exception->getMessage();
+    $responseText = 'La consulta no pudo completarse.';
 }
 ?>
 <!DOCTYPE html>
@@ -45,7 +58,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQL Injection manual</title>
+    <title>SQL Injection automatizada</title>
     <script>
         (() => {
             const savedTheme = localStorage.getItem('securityLabTheme');
@@ -55,7 +68,7 @@ try {
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/styles.css">
 </head>
-<body data-page="module-sqli">
+<body data-page="module-sqli-auto">
 <div class="app-shell">
 
     <aside class="sidebar">
@@ -105,8 +118,8 @@ try {
                     <?= icon('menu', 20) ?>
                 </button>
                 <div class="page-title">
-                    <h1>SQL Injection manual</h1>
-                    <p>Consulta vulnerable de usuarios mediante un parámetro controlado</p>
+                    <h1>SQL Injection automatizada</h1>
+                    <p>Endpoint preparado para una evaluación automatizada autenticada</p>
                 </div>
             </div>
             <div class="header-actions">
@@ -118,79 +131,55 @@ try {
             </div>
         </header>
         <main class="content">
-            <div class="breadcrumb"><a href="/dashboard.php">Panel</a><span>/</span><span>Módulo 04</span></div>
+            <div class="breadcrumb"><a href="/dashboard.php">Panel</a><span>/</span><span>Módulo 05</span></div>
             <section class="module-hero">
-                <div class="module-hero-number">MÓDULO 04 · OWASP A03</div>
-                <h1>Consulta directa de usuarios</h1>
-                <p>El identificador proporcionado se concatena dentro de una consulta SQL sin parametrización.</p>
+                <div class="module-hero-number">MÓDULO 05 · OWASP A03</div>
+                <h1>Objetivo automatizado del laboratorio</h1>
+                <p>La respuesta cambia según el parámetro ID y conserva errores observables del motor de base de datos.</p>
             </section>
-            <div class="warning-box"><strong>Vulnerabilidad intencional:</strong> la aplicación no valida ni parametriza el identificador antes de enviarlo a PostgreSQL.</div>
+            <div class="warning-box"><strong>Vulnerabilidad intencional:</strong> el endpoint usa concatenación directa y depende de la cookie de sesión del laboratorio.</div>
             <section class="module-layout">
                 <article class="panel-card">
 
                     <div class="section-heading">
-                        <div><h2>Consulta manual por ID</h2><p>El valor se inserta directamente en la sentencia SQL.</p></div>
+                        <div><h2>Punto de prueba automatizada</h2><p>Endpoint autenticado con un parámetro GET deliberadamente vulnerable.</p></div>
                     </div>
 
-                    <form method="get" action="/sqli.php">
+                    <form method="get" action="/sqli-automated.php">
                         <div class="form-group">
-                            <label for="id">Identificador del usuario</label>
+                            <label for="id">ID consultado</label>
                             <input class="input-control" id="id" name="id" type="text" value="<?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?>" autocomplete="off" required>
                         </div>
-                        <button class="primary-button" type="submit">Ejecutar consulta <span>→</span></button>
+                        <button class="primary-button" type="submit">Enviar solicitud <span>→</span></button>
                     </form>
-
-                    <?php if ($sqlExecuted !== ''): ?>
-                        <div style="margin-top: 24px;">
-                            <h3>Consulta construida</h3>
-                            <pre class="terminal-output"><code><?= htmlspecialchars($sqlExecuted, ENT_QUOTES, 'UTF-8') ?></code></pre>
-                        </div>
-                    <?php endif; ?>
 
                     <?php if ($errorMessage !== null): ?>
                         <div class="alert alert-error" style="margin-top: 20px;"><?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?></div>
                     <?php endif; ?>
 
                     <div style="margin-top: 24px;">
-                        <h3>Resultados: <?= count($results) ?></h3>
-                        <div class="project-module-table-wrapper">
-                            <table class="info-table">
-                                <thead><tr><th>ID</th><th>Usuario</th><th>Nombre</th><th>Rol</th></tr></thead>
-                                <tbody>
-                                <?php if ($results === []): ?>
-                                    <tr><td colspan="4">No se encontraron registros.</td></tr>
-                                <?php endif; ?>
-                                <?php foreach ($results as $row): ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars((string) $row['id']) ?></td>
-                                        <td><?= htmlspecialchars((string) $row['username']) ?></td>
-                                        <td><?= htmlspecialchars((string) $row['full_name']) ?></td>
-                                        <td><?= htmlspecialchars((string) $row['role']) ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                        <h3>Respuesta del endpoint</h3>
+                        <pre class="terminal-output"><?= htmlspecialchars($responseText, ENT_QUOTES, 'UTF-8') ?></pre>
                     </div>
 
                 </article>
                 <aside class="module-status-card">
 
-                    <h3>Flujo vulnerable</h3>
-                    <div class="status-list">
-                        <div class="status-item"><span class="status-circle">1</span>Parámetro recibido por GET</div>
-                        <div class="status-item"><span class="status-circle">2</span>Concatenación directa</div>
-                        <div class="status-item"><span class="status-circle">3</span>Consulta enviada a PostgreSQL</div>
-                        <div class="status-item"><span class="status-circle">4</span>Resultados visibles</div>
-                    </div>
-                    <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
-                    <h3>Punto de prueba</h3>
+                    <h3>Datos del objetivo</h3>
                     <table class="info-table">
+                        <tr><th>Ruta</th><td><code>/sqli-automated.php</code></td></tr>
                         <tr><th>Método</th><td>GET</td></tr>
                         <tr><th>Parámetro</th><td><code>id</code></td></tr>
-                        <tr><th>Ruta</th><td><code>/sqli.php</code></td></tr>
-                        <tr><th>Motor</th><td>PostgreSQL 16</td></tr>
+                        <tr><th>Autenticación</th><td>Cookie de sesión</td></tr>
                     </table>
+                    <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
+                    <h3>Propósito académico</h3>
+                    <div class="status-list">
+                        <div class="status-item"><span class="status-circle">1</span>Detectar el parámetro</div>
+                        <div class="status-item"><span class="status-circle">2</span>Identificar PostgreSQL</div>
+                        <div class="status-item"><span class="status-circle">3</span>Enumerar la base del laboratorio</div>
+                        <div class="status-item"><span class="status-circle">4</span>Documentar la evidencia</div>
+                    </div>
 
                 </aside>
             </section>
