@@ -1,0 +1,61 @@
+$ErrorActionPreference = "Stop"
+
+Set-Location (Split-Path -Parent $PSScriptRoot)
+
+$branch = (git branch --show-current).Trim()
+if ($branch -ne "v2-secure") {
+    throw "DETENIDO: la rama actual es '$branch'."
+}
+
+Write-Host "=== Contenedores V2 ===" -ForegroundColor Cyan
+docker compose -p security-lab-v2 ps
+
+Write-Host "`n=== Redirección HTTP ===" -ForegroundColor Cyan
+$httpHeaders = curl.exe -s -D - -o NUL "http://localhost:8082/login.php"
+$httpHeaders
+
+if ($httpHeaders -notmatch "HTTP/\S+ 301") {
+    throw "La entrada HTTP no respondió con 301."
+}
+
+if ($httpHeaders -notmatch "Location: https://localhost:8443/login.php") {
+    throw "La redirección no apunta a HTTPS 8443."
+}
+
+Write-Host "`n=== HTTPS y cabeceras ===" -ForegroundColor Cyan
+$httpsHeaders = curl.exe -k -s -D - -o NUL "https://localhost:8443/login.php"
+$httpsHeaders
+
+$requiredHeaders = @(
+    "X-Content-Type-Options: nosniff",
+    "X-Frame-Options: DENY",
+    "Referrer-Policy: no-referrer",
+    "Permissions-Policy:",
+    "Content-Security-Policy:"
+)
+
+foreach ($header in $requiredHeaders) {
+    if ($httpsHeaders -notmatch [regex]::Escape($header)) {
+        throw "Falta la cabecera: $header"
+    }
+}
+
+if ($httpsHeaders -notmatch "Set-Cookie: SECURITYLABV2SESSID=.*Secure") {
+    throw "La cookie de sesión no contiene Secure."
+}
+
+if ($httpsHeaders -notmatch "Set-Cookie: SECURITYLABV2SESSID=.*HttpOnly") {
+    throw "La cookie de sesión no contiene HttpOnly."
+}
+
+if ($httpsHeaders -notmatch "Set-Cookie: SECURITYLABV2SESSID=.*SameSite=Strict") {
+    throw "La cookie de sesión no contiene SameSite=Strict."
+}
+
+Write-Host "`n=== Configuración PHP ===" -ForegroundColor Cyan
+docker compose -p security-lab-v2 exec -T app php -i |
+    Select-String "allow_url_include|display_errors|expose_php|session.cookie_secure|disable_functions"
+
+Write-Host "`nVALIDACIÓN HTTPS CORRECTA" -ForegroundColor Green
+Write-Host "V1: http://localhost:8081"
+Write-Host "V2: https://localhost:8443"
