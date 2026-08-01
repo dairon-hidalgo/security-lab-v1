@@ -34,76 +34,64 @@ $pdo->exec(
     )'
 );
 
-$pdo->exec(
-    'CREATE TABLE IF NOT EXISTS xss_cookie_captures (
-        id SERIAL PRIMARY KEY,
-        captured_by_user_id INTEGER REFERENCES users(id),
-        cookie_name VARCHAR(100) NOT NULL,
-        cookie_value TEXT NOT NULL,
-        page_url TEXT,
-        ip_address VARCHAR(64),
-        captured_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )'
-);
 
-if (!isset($_COOKIE['LAB_XSS_DEMO'])) {
-    setcookie(
-        'LAB_XSS_DEMO',
-        'fiis-demo-user-' . (string) ($user['id'] ?? '0'),
-        [
-            'expires' => 0,
-            'path' => '/',
-            'secure' => false,
-            'httponly' => false,
-            'samesite' => 'Lax',
-        ]
-    );
-}
 
 $message = null;
 $messageClass = 'status-note';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = (string) ($_POST['action'] ?? 'create');
+    $submittedToken = isset($_POST['csrf_token'])
+        ? (string) $_POST['csrf_token']
+        : null;
 
-    if ($action === 'create') {
-        $content = trim((string) ($_POST['content'] ?? ''));
+    if (!csrf_token_is_valid($submittedToken)) {
+        http_response_code(400);
+        $message = 'La solicitud no es válida. Actualiza la página e inténtalo nuevamente.';
+        $messageClass = 'status-note status-note-error';
+    } else {
+        $action = (string) ($_POST['action'] ?? 'create');
 
-        if ($content === '') {
-            $message = 'Escribe un comentario antes de guardarlo.';
-            $messageClass = 'status-note status-note-error';
-        } else {
-            $statement = $pdo->prepare(
-                'INSERT INTO xss_stored_comments (
-                    user_id,
-                    author_name,
-                    content,
-                    ip_address
-                ) VALUES (
-                    :user_id,
-                    :author_name,
-                    :content,
-                    :ip_address
-                )'
-            );
+        if ($action === 'create') {
+            $content = trim((string) ($_POST['content'] ?? ''));
 
-            $statement->execute([
-                ':user_id' => (int) ($user['id'] ?? 0),
-                ':author_name' => (string) ($user['full_name'] ?? 'Usuario'),
-                ':content' => $content,
-                ':ip_address' => (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'),
-            ]);
+            if ($content === '') {
+                $message = 'Escribe un comentario antes de guardarlo.';
+                $messageClass = 'status-note status-note-error';
+            } elseif (strlen($content) > 1000) {
+                $message = 'El comentario no puede superar los 1000 caracteres.';
+                $messageClass = 'status-note status-note-error';
+            } else {
+                $statement = $pdo->prepare(
+                    'INSERT INTO xss_stored_comments (
+                        user_id,
+                        author_name,
+                        content,
+                        ip_address
+                    ) VALUES (
+                        :user_id,
+                        :author_name,
+                        :content,
+                        :ip_address
+                    )'
+                );
 
-            header('Location: /xss-stored.php?saved=1');
+                $statement->execute([
+                    ':user_id' => (int) ($user['id'] ?? 0),
+                    ':author_name' => (string) ($user['full_name'] ?? 'Usuario'),
+                    ':content' => $content,
+                    ':ip_address' => (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'),
+                ]);
+
+                header('Location: /xss-stored.php?saved=1');
+                exit;
+            }
+        }
+
+        if ($action === 'reset' && (string) ($user['role'] ?? '') === 'admin') {
+            $pdo->exec('TRUNCATE TABLE xss_stored_comments RESTART IDENTITY');
+            header('Location: /xss-stored.php?reset=1');
             exit;
         }
-    }
-
-    if ($action === 'reset' && (string) ($user['role'] ?? '') === 'admin') {
-        $pdo->exec('TRUNCATE TABLE xss_cookie_captures RESTART IDENTITY');
-        $pdo->exec('TRUNCATE TABLE xss_stored_comments RESTART IDENTITY');
-        header('Location: /xss-stored.php?reset=1');
-        exit;
     }
 }
 
@@ -113,7 +101,7 @@ if (isset($_GET['saved'])) {
 }
 
 if (isset($_GET['reset'])) {
-    $message = 'Comentarios y capturas de demostración eliminados.';
+    $message = 'Comentarios eliminados correctamente.';
     $messageClass = 'status-note status-note-success';
 }
 
@@ -124,20 +112,7 @@ $comments = $pdo->query(
      LIMIT 20'
 )->fetchAll();
 
-$captures = $pdo->query(
-    'SELECT
-        xss_cookie_captures.cookie_name,
-        xss_cookie_captures.cookie_value,
-        xss_cookie_captures.page_url,
-        xss_cookie_captures.ip_address,
-        xss_cookie_captures.captured_at,
-        users.username
-     FROM xss_cookie_captures
-     LEFT JOIN users
-        ON users.id = xss_cookie_captures.captured_by_user_id
-     ORDER BY xss_cookie_captures.captured_at DESC
-     LIMIT 10'
-)->fetchAll();
+$captures = [];
 
 $userInitials = xss_stored_initials($user);
 ?>
@@ -304,7 +279,7 @@ $userInitials = xss_stored_initials($user);
 
             <div>
                 <strong>Service Desk FIIS</strong>
-                <span>Security Lab · V1</span>
+                <span>Security Lab · V2</span>
             </div>
         </div>
 
@@ -388,16 +363,15 @@ $userInitials = xss_stored_initials($user);
                 <div class="module-hero-number">MÓDULO 09 · OWASP A03</div>
                 <h1>Contenido persistente ejecutado al visitar la página</h1>
                 <p>
-                    Los comentarios se guardan en PostgreSQL y posteriormente se
-                    insertan en el HTML sin codificación ni sanitización.
+                    Los comentarios se guardan en PostgreSQL y se codifican al mostrarse
+                    para impedir la ejecución de HTML o JavaScript almacenado.
                 </p>
             </section>
 
             <div class="warning-box">
-                <strong>Entorno académico local:</strong>
-                la demostración de captura registra únicamente la cookie ficticia
-                <code>LAB_XSS_DEMO</code> dentro del mismo contenedor. No envía datos
-                a servicios externos.
+                <strong>Control aplicado:</strong>
+                token CSRF, límite de longitud y codificación contextual de la salida.
+                Los colectores de cookies están deshabilitados en la V2.
             </div>
 
             <section class="module-layout">
@@ -417,6 +391,7 @@ $userInitials = xss_stored_initials($user);
 
                     <form class="stored-form" method="post" action="/xss-stored.php">
                         <input type="hidden" name="action" value="create">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
 
                         <div class="form-group">
                             <label for="content">Contenido del comentario</label>
@@ -424,6 +399,7 @@ $userInitials = xss_stored_initials($user);
                                 id="content"
                                 name="content"
                                 autocomplete="off"
+                                maxlength="1000"
                                 required
                             ></textarea>
                         </div>
@@ -450,14 +426,14 @@ $userInitials = xss_stored_initials($user);
                     </form>
 
                     <div class="stored-proof" id="stored-proof">
-                        Estado de comprobación: todavía no se ha ejecutado el contenido almacenado de demostración.
+                        Estado de comprobación: el contenido almacenado se presenta como texto seguro.
                     </div>
 
                     <div style="margin-top: 26px;">
                         <div class="section-heading">
                             <div>
                                 <h2>Comentarios almacenados</h2>
-                                <p>Cada cuerpo se imprime deliberadamente sin <code>htmlspecialchars()</code>.</p>
+                                <p>Cada comentario se codifica antes de incorporarse al HTML.</p>
                             </div>
                         </div>
 
@@ -481,13 +457,14 @@ $userInitials = xss_stored_initials($user);
                                     </div>
 
                                     <div class="stored-comment-body">
-                                        <?php
-                                        /*
-                                         * Vulnerabilidad intencional del laboratorio:
-                                         * contenido persistente renderizado sin codificación.
-                                         */
-                                        echo (string) $comment['content'];
-                                        ?>
+                                        <?= nl2br(
+                                            htmlspecialchars(
+                                                (string) $comment['content'],
+                                                ENT_QUOTES | ENT_SUBSTITUTE,
+                                                'UTF-8'
+                                            ),
+                                            false
+                                        ) ?>
                                     </div>
                                 </article>
                             <?php endforeach; ?>
@@ -513,7 +490,7 @@ $userInitials = xss_stored_initials($user);
                             type="button"
                             data-stored-example="&lt;strong&gt;Comentario HTML persistente&lt;/strong&gt;"
                         >
-                            <strong>HTML persistente</strong>
+                            <strong>HTML codificado</strong>
                             <code>&lt;strong&gt;...&lt;/strong&gt;</code>
                         </button>
 
@@ -522,7 +499,7 @@ $userInitials = xss_stored_initials($user);
                             type="button"
                             data-stored-example="&lt;img src=x onerror=&quot;(()=>{const item=document.cookie.split('; ').find(v=>v.startsWith('LAB_XSS_DEMO='))||'LAB_XSS_DEMO=(no encontrada)';fetch('/xss-collector.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'cookie='+encodeURIComponent(item)+'&amp;page='+encodeURIComponent(location.href)}).then(()=>{const p=document.getElementById('stored-proof');if(p){p.textContent='Cookie ficticia capturada localmente mediante XSS Stored';}});this.remove();})()&quot;&gt;"
                         >
-                            <strong>Captura local de cookie ficticia</strong>
+                            <strong>Payload XSS neutralizado</strong>
                             <code>&lt;img src=x onerror=...&gt;</code>
                         </button>
                     </div>
@@ -534,12 +511,12 @@ $userInitials = xss_stored_initials($user);
                         <tr><th>Método</th><td>POST</td></tr>
                         <tr><th>Campo</th><td><code>content</code></td></tr>
                         <tr><th>Persistencia</th><td>PostgreSQL</td></tr>
-                        <tr><th>Salida</th><td>Sin codificación</td></tr>
+                        <tr><th>Salida</th><td>Codificada con htmlspecialchars()</td></tr>
                     </table>
 
                     <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
 
-                    <h3>Capturas locales</h3>
+                    <h3>Colector de cookies</h3>
 
                     <div class="project-module-table-wrapper">
                         <table class="info-table">
@@ -554,7 +531,7 @@ $userInitials = xss_stored_initials($user);
                             <tbody>
                             <?php if ($captures === []): ?>
                                 <tr>
-                                    <td colspan="3">Sin capturas registradas.</td>
+                                    <td colspan="3">Deshabilitado en la versión segura.</td>
                                 </tr>
                             <?php endif; ?>
 

@@ -38,25 +38,18 @@ $pdo->exec(
     )'
 );
 
-if (!isset($_COOKIE['LAB_XSS_DEMO'])) {
-    setcookie(
-        'LAB_XSS_DEMO',
-        'fiis-user-' . (string) ($user['id'] ?? '0'),
-        [
-            'expires' => 0,
-            'path' => '/',
-            'secure' => false,
-            'httponly' => false,
-            'samesite' => 'Lax',
-        ]
-    );
-}
 
-$payload = (string) ($_GET['q'] ?? 'Hola, Service Desk FIIS');
+$payload = trim((string) ($_GET['q'] ?? 'Hola, Service Desk FIIS'));
 $wasSubmitted = array_key_exists('q', $_GET);
+$validationError = null;
 $userInitials = xss_reflected_initials($user);
 
-if ($wasSubmitted) {
+if (strlen($payload) > 200) {
+    $validationError = 'El contenido no puede superar los 200 caracteres.';
+    $payload = substr($payload, 0, 200);
+}
+
+if ($wasSubmitted && $validationError === null) {
     $statement = $pdo->prepare(
         'INSERT INTO xss_reflected_attempts (
             user_id,
@@ -208,7 +201,7 @@ $recentAttempts = $pdo->query(
 
             <div>
                 <strong>Service Desk FIIS</strong>
-                <span>Security Lab · V1</span>
+                <span>Security Lab · V2</span>
             </div>
         </div>
 
@@ -309,15 +302,15 @@ $recentAttempts = $pdo->query(
                 <div class="module-hero-number">MÓDULO 08 · OWASP A03</div>
                 <h1>Contenido reflejado por el servidor</h1>
                 <p>
-                    El valor del parámetro <code>q</code> se inserta en el HTML de
-                    respuesta sin utilizar codificación ni sanitización.
+                    El valor del parámetro <code>q</code> se valida y se codifica antes de
+                    incorporarse a la respuesta HTML.
                 </p>
             </section>
 
             <div class="warning-box">
-                <strong>Vulnerabilidad intencional:</strong>
-                el bloque de resultado imprime la entrada del usuario directamente.
-                Este escenario debe permanecer únicamente en <code>localhost</code>.
+                <strong>Control aplicado:</strong>
+                la salida utiliza codificación contextual y el navegador la interpreta
+                como texto, no como HTML ejecutable.
             </div>
 
             <section class="module-layout">
@@ -340,6 +333,7 @@ $recentAttempts = $pdo->query(
                                 type="text"
                                 value="<?= htmlspecialchars($payload, ENT_QUOTES, 'UTF-8') ?>"
                                 autocomplete="off"
+                                maxlength="200"
                                 required
                             >
                         </div>
@@ -350,7 +344,13 @@ $recentAttempts = $pdo->query(
                         </button>
                     </form>
 
-                    <?php if ($wasSubmitted): ?>
+                    <?php if ($validationError !== null): ?>
+                        <div class="status-note status-note-error">
+                            <?= htmlspecialchars($validationError, ENT_QUOTES, 'UTF-8') ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($wasSubmitted && $validationError === null): ?>
                         <div class="xss-result">
                             <div class="xss-result-header">
                                 <strong>Respuesta reflejada</strong>
@@ -358,18 +358,16 @@ $recentAttempts = $pdo->query(
                             </div>
 
                             <div class="xss-result-body">
-                                <?php
-                                /*
-                                 * Vulnerabilidad intencional del laboratorio:
-                                 * la entrada se imprime sin htmlspecialchars().
-                                 */
-                                echo $payload;
-                                ?>
+                                <?= htmlspecialchars(
+                                    $payload,
+                                    ENT_QUOTES | ENT_SUBSTITUTE,
+                                    'UTF-8'
+                                ) ?>
                             </div>
                         </div>
 
                         <div class="xss-proof" id="xss-proof">
-                            Estado de comprobación: el navegador todavía no ha modificado este texto.
+                            Estado de comprobación: el contenido fue tratado como texto seguro.
                         </div>
                     <?php endif; ?>
 
@@ -459,14 +457,14 @@ $recentAttempts = $pdo->query(
                         <tr><th>Método</th><td>GET</td></tr>
                         <tr><th>Parámetro</th><td><code>q</code></td></tr>
                         <tr><th>Ruta</th><td><code>/xss-reflected.php</code></td></tr>
-                        <tr><th>Salida</th><td>Sin codificación</td></tr>
+                        <tr><th>Salida</th><td>Codificada con htmlspecialchars()</td></tr>
                     </table>
 
                     <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
 
-                    <h3>Cookie visible desde JavaScript</h3>
+                    <h3>Protección de la sesión</h3>
                     <div class="xss-cookie-output" id="xss-cookie-output">
-                        Cargando <code>document.cookie</code>...
+                        La cookie de sesión usa <code>HttpOnly</code> y no se expone en esta vista.
                     </div>
                 </aside>
             </section>
@@ -492,7 +490,7 @@ $recentAttempts = $pdo->query(
     const cookieOutput = document.getElementById('xss-cookie-output');
 
     if (cookieOutput) {
-        cookieOutput.textContent = document.cookie || '(sin cookies accesibles)';
+        cookieOutput.textContent = 'Cookie de sesión protegida con HttpOnly y SameSite=Strict.';
     }
 </script>
 </body>

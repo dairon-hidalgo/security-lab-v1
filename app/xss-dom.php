@@ -11,65 +11,8 @@ require_login();
 $user = current_user();
 $pdo = db();
 
-/*
- * Cookie ficticia del laboratorio.
- * Se deja accesible desde JavaScript de forma intencional para demostrar
- * el impacto de una vulnerabilidad XSS DOM sin utilizar datos reales.
- */
-if (!isset($_COOKIE['LAB_XSS_DEMO'])) {
-    $demoCookieValue = sprintf(
-        'dom-user-%d-%s',
-        (int) ($user['id'] ?? 0),
-        bin2hex(random_bytes(4))
-    );
-
-    setcookie('LAB_XSS_DEMO', $demoCookieValue, [
-        'expires' => 0,
-        'path' => '/',
-        'secure' => false,
-        'httponly' => false,
-        'samesite' => 'Lax',
-    ]);
-
-    $_COOKIE['LAB_XSS_DEMO'] = $demoCookieValue;
-}
-
 $databaseError = null;
 $recentCaptures = [];
-
-try {
-    $pdo->exec(
-        'CREATE TABLE IF NOT EXISTS xss_dom_captures (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,
-            cookie_name VARCHAR(80) NOT NULL,
-            cookie_value VARCHAR(255) NOT NULL,
-            source_hash TEXT NULL,
-            page_url TEXT NULL,
-            ip_address VARCHAR(64) NULL,
-            user_agent TEXT NULL,
-            captured_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )'
-    );
-
-    $recentCaptures = $pdo->query(
-        'SELECT
-            xss_dom_captures.id,
-            xss_dom_captures.cookie_name,
-            xss_dom_captures.cookie_value,
-            xss_dom_captures.source_hash,
-            xss_dom_captures.page_url,
-            xss_dom_captures.ip_address,
-            xss_dom_captures.captured_at,
-            users.username
-         FROM xss_dom_captures
-         LEFT JOIN users ON users.id = xss_dom_captures.user_id
-         ORDER BY xss_dom_captures.captured_at DESC
-         LIMIT 15'
-    )->fetchAll();
-} catch (Throwable $exception) {
-    $databaseError = $exception->getMessage();
-}
 
 $nameParts = preg_split(
     '/\s+/',
@@ -214,7 +157,7 @@ function short_dom_value(string $value, int $limit = 78): string
 
             <div>
                 <strong>Service Desk FIIS</strong>
-                <span>Security Lab · V1</span>
+                <span>Security Lab · V2</span>
             </div>
         </div>
 
@@ -337,7 +280,7 @@ function short_dom_value(string $value, int $limit = 78): string
                     MÓDULO 10 · DOM-BASED XSS
                 </div>
 
-                <h1>Visor vulnerable basado en el fragmento URL</h1>
+                <h1>Visor seguro basado en el fragmento URL</h1>
 
                 <p>
                     El navegador lee el contenido situado después del símbolo
@@ -347,10 +290,9 @@ function short_dom_value(string $value, int $limit = 78): string
             </section>
 
             <div class="warning-box">
-                <strong>Vulnerabilidad intencional:</strong>
-                la fuente controlada por el usuario es
-                <code>location.hash</code> y el punto vulnerable es
-                <code>element.innerHTML</code>.
+                <strong>Control aplicado:</strong>
+                la fuente <code>location.hash</code> se conserva como texto y no se
+                interpreta como marcado ejecutable.
             </div>
 
             <section class="module-layout">
@@ -368,7 +310,7 @@ function short_dom_value(string $value, int $limit = 78): string
                     <div class="dom-source-row">
                         <div class="form-group" style="margin-bottom: 0;">
                             <label for="dom-source">
-                                Texto, HTML o demostración controlada
+                                Texto o payload para comprobar la neutralización
                             </label>
 
                             <input
@@ -391,7 +333,7 @@ function short_dom_value(string $value, int $limit = 78): string
                     </div>
 
                     <div class="dom-proof" id="dom-proof">
-                        Aún no se ha ejecutado una demostración.
+                        El contenido se mostrará como texto, sin ejecutarse.
                     </div>
 
                     <div class="dom-sink" id="dom-sink">
@@ -399,7 +341,7 @@ function short_dom_value(string $value, int $limit = 78): string
                     </div>
 
                     <div class="dom-cookie-box" id="dom-cookie-view">
-                        document.cookie: cargando…
+                        Cookie de sesión protegida con HttpOnly.
                     </div>
 
                     <div
@@ -436,7 +378,7 @@ function short_dom_value(string $value, int $limit = 78): string
                             class="dom-example-button"
                             id="dom-example-xss"
                         >
-                            <strong>Captura local de cookie ficticia</strong>
+                            <strong>Payload XSS neutralizado</strong>
                             <code>&lt;img onerror="captureDemoCookie()"&gt;</code>
                         </button>
                     </div>
@@ -449,12 +391,12 @@ function short_dom_value(string $value, int $limit = 78): string
 
                         <div class="status-item">
                             <span class="status-circle">2</span>
-                            Sink: <code>innerHTML</code>
+                            Sink: <code>textContent</code>
                         </div>
 
                         <div class="status-item">
                             <span class="status-circle">3</span>
-                            Destino: colector local
+                            Colector: deshabilitado
                         </div>
                     </div>
                 </aside>
@@ -463,11 +405,10 @@ function short_dom_value(string $value, int $limit = 78): string
             <section class="panel-card" style="margin-top: 21px;">
                 <div class="section-heading">
                     <div>
-                        <h2>Capturas locales recientes</h2>
+                        <h2>Colector de cookies deshabilitado</h2>
 
                         <p>
-                            Solamente se admite la cookie ficticia
-                            <code>LAB_XSS_DEMO</code>.
+                            La V2 no recopila cookies ni contenido desde el DOM.
                         </p>
                     </div>
                 </div>
@@ -478,7 +419,7 @@ function short_dom_value(string $value, int $limit = 78): string
                     </div>
                 <?php elseif ($recentCaptures === []): ?>
                     <div class="alert alert-info">
-                        Todavía no se registraron capturas del módulo DOM.
+                        No se registran capturas en la versión segura.
                     </div>
                 <?php else: ?>
                     <div style="overflow-x: auto;">
@@ -551,8 +492,8 @@ function short_dom_value(string $value, int $limit = 78): string
         const captureStatus = document.getElementById('dom-capture-status');
 
         const normalExample = 'Hola desde Service Desk FIIS';
-        const htmlExample = '<strong>HTML interpretado por innerHTML</strong>';
-        const xssExample = '<img src=x onerror="captureDemoCookie();document.getElementById(\'dom-proof\').textContent=\'XSS DOM ejecutado y cookie ficticia enviada al colector local\';this.remove()">';
+        const htmlExample = '<strong>Este HTML se mostrará como texto</strong>';
+        const xssExample = '<img src=x onerror="alert(1)">';
 
         function decodeFragment() {
             const raw = window.location.hash.slice(1);
@@ -569,20 +510,18 @@ function short_dom_value(string $value, int $limit = 78): string
         }
 
         function renderFromFragment() {
-            const source = decodeFragment();
+            const source = decodeFragment().slice(0, 1000);
 
             sourceInput.value = source;
 
             if (source === '') {
                 sink.textContent = 'El contenido procesado aparecerá aquí.';
+                proof.textContent = 'No se recibió contenido.';
                 return;
             }
 
-            /*
-             * Vulnerabilidad intencional del módulo:
-             * la fuente location.hash se inserta sin sanitización.
-             */
-            sink.innerHTML = source;
+            sink.textContent = source;
+            proof.textContent = 'Contenido neutralizado: se usó textContent.';
         }
 
         function setExample(value) {
@@ -590,62 +529,16 @@ function short_dom_value(string $value, int $limit = 78): string
             renderFromFragment();
         }
 
-        function readDemoCookie() {
-            const match = document.cookie.match(
-                /(?:^|;\s*)LAB_XSS_DEMO=([^;]*)/
-            );
-
-            return match ? decodeURIComponent(match[1]) : '';
-        }
-
-        window.captureDemoCookie = async function captureDemoCookie() {
-            const demoValue = readDemoCookie();
-
-            if (!demoValue) {
-                captureStatus.textContent =
-                    'No se encontró la cookie ficticia LAB_XSS_DEMO.';
-                return;
-            }
-
-            captureStatus.textContent = 'Registrando captura local…';
-
-            try {
-                const response = await fetch('/xss-dom-collector.php', {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        cookie: `LAB_XSS_DEMO=${demoValue}`,
-                        sourceHash: decodeFragment(),
-                        pageUrl: window.location.href
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok || !data.ok) {
-                    throw new Error(data.message || 'No fue posible registrar la captura.');
-                }
-
-                captureStatus.textContent =
-                    'Cookie ficticia capturada localmente. Recarga la página para verla en la tabla.';
-            } catch (error) {
-                captureStatus.textContent = `Error: ${error.message}`;
-            }
-        };
-
         document
             .getElementById('render-dom-source')
             .addEventListener('click', () => {
-                setExample(sourceInput.value);
+                setExample(sourceInput.value.slice(0, 1000));
             });
 
         sourceInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                setExample(sourceInput.value);
+                setExample(sourceInput.value.slice(0, 1000));
             }
         });
 
@@ -663,7 +556,11 @@ function short_dom_value(string $value, int $limit = 78): string
 
         window.addEventListener('hashchange', renderFromFragment);
 
-        cookieView.textContent = `document.cookie: ${document.cookie || '(vacío)'}`;
+        cookieView.textContent =
+            'Cookie de sesión protegida con HttpOnly y SameSite=Strict.';
+        captureStatus.textContent =
+            'El colector de cookies está deshabilitado en la V2.';
+
         renderFromFragment();
     })();
 </script>
