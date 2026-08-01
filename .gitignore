@@ -20,3 +20,5 @@ app/dashboard-codificacion-*.php
 # Evidencias temporales
 pentest/evidence/*
 !pentest/evidence/.gitkeep
+# Documentos temporales
+REPARACION.md
