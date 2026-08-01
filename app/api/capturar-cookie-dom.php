@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/db.php';
-require_once __DIR__ . '/session.php';
+require_once __DIR__ . '/../includes/helpers.php';
 
 header('Content-Type: application/json; charset=UTF-8');
 
@@ -50,8 +49,7 @@ $sourceHash = substr((string) ($payload['sourceHash'] ?? ''), 0, 3000);
 $pageUrl = substr((string) ($payload['pageUrl'] ?? ''), 0, 1500);
 
 /*
- * El colector acepta exclusivamente la cookie ficticia del laboratorio.
- * No almacena SECURITYLABSESSID ni cualquier otro valor de document.cookie.
+ * El punto de captura acepta exclusivamente la cookie ficticia del sistema.
  */
 if (
     preg_match(

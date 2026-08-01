@@ -7,7 +7,7 @@ require_once __DIR__ . '/session.php';
 require_once __DIR__ . '/auth-log.php';
 
 if (is_authenticated()) {
-    header('Location: /dashboard.php');
+    header('Location: /panel');
     exit;
 }
 
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $_SESSION['login_time'] = date('Y-m-d H:i:s');
 
-            header('Location: /dashboard.php');
+            header('Location: /panel');
             exit;
         }
 
@@ -81,17 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Acceso — FIIS Security Lab</title>
-
-    <script>
-        (() => {
-            const savedTheme = localStorage.getItem('securityLabTheme');
-
-            if (savedTheme) {
-                document.documentElement.dataset.theme = savedTheme;
-            }
-        })();
-    </script>
+    <title>Acceso — Service Desk FIIS</title>
 
     <link
         rel="icon"
@@ -104,229 +94,107 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="login-body">
 <div class="login-layout">
-    <section class="login-hero">
-        <div class="brand">
+    <main class="login-box">
+        <div class="login-brand">
             <div class="brand-logo">FI</div>
 
             <div>
-                <div class="brand-name">FIIS Security Lab</div>
+                <div class="brand-name">Service Desk FIIS</div>
 
-                <div class="brand-subtitle">
-                    Service Desk · Versión vulnerable
-                </div>
+                <span class="brand-subtitle">
+                    Acceso al sistema
+                </span>
             </div>
         </div>
 
-        <div class="hero-content">
-            <div class="hero-chip">
-                <span class="hero-chip-dot"></span>
-                Entorno local activo
-            </div>
+        <div class="login-heading">
+            <span>Acceso al sistema</span>
 
-            <h1>
-                Seguridad web aplicada en un escenario controlado.
-            </h1>
+            <h2>Iniciar sesión</h2>
 
             <p>
-                Laboratorio académico desarrollado con PHP 8.2,
-                Apache, PostgreSQL 16 y Docker Desktop.
+                Ingresa con tu cuenta para acceder al panel.
             </p>
-
-            <div class="hero-features">
-                <article class="hero-feature">
-                    <strong>PHP 8.2</strong>
-                    <span>Aplicación y lógica web</span>
-                </article>
-
-                <article class="hero-feature">
-                    <strong>PostgreSQL 16</strong>
-                    <span>Persistencia del laboratorio</span>
-                </article>
-
-                <article class="hero-feature">
-                    <strong>Docker</strong>
-                    <span>Despliegue reproducible</span>
-                </article>
-            </div>
         </div>
 
-        <div class="hero-footer">
-            Uso exclusivamente académico · localhost · datos ficticios
-        </div>
-    </section>
-
-    <section class="login-side">
-        <div class="login-box">
-            <div class="mobile-brand">
-                <div class="brand-logo">FI</div>
-
-                <div>
-                    <div class="brand-name">FIIS Security Lab</div>
-                    <div class="brand-subtitle">Service Desk V1</div>
+        <div class="login-card">
+            <?php if ($errorMessage !== null): ?>
+                <div class="alert alert-error">
+                    <?= htmlspecialchars($errorMessage) ?>
                 </div>
-            </div>
+            <?php endif; ?>
 
-            <div class="login-heading">
-                <span>Versión vulnerable</span>
+            <form
+                method="post"
+                action="/login"
+                autocomplete="off"
+            >
+                <div class="form-group">
+                    <label for="username">
+                        Nombre de usuario
+                    </label>
 
-                <h2>Iniciar sesión</h2>
+                    <div class="input-wrapper">
+                        <span class="input-icon">●</span>
 
-                <p>
-                    Utiliza una cuenta ficticia para ingresar al laboratorio.
-                </p>
-            </div>
-
-            <div class="login-card">
-                <?php if ($errorMessage !== null): ?>
-                    <div class="alert alert-error">
-                        <?= htmlspecialchars($errorMessage) ?>
-                    </div>
-                <?php endif; ?>
-
-                <form
-                    method="post"
-                    action="/login.php"
-                    autocomplete="off"
-                >
-                    <div class="form-group">
-                        <label for="username">
-                            Nombre de usuario
-                        </label>
-
-                        <div class="input-wrapper">
-                            <span class="input-icon">●</span>
-
-                            <input
-                                class="input-control"
-                                type="text"
-                                id="username"
-                                name="username"
-                                value="<?= htmlspecialchars($username) ?>"
-                                placeholder="Ingresa tu usuario"
-                                required
-                                autofocus
-                            >
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">
-                            Contraseña
-                        </label>
-
-                        <div class="input-wrapper">
-                            <span class="input-icon">◆</span>
-
-                            <input
-                                class="input-control"
-                                type="password"
-                                id="password"
-                                name="password"
-                                placeholder="Ingresa tu contraseña"
-                                required
-                            >
-
-                            <button
-                                type="button"
-                                class="password-toggle"
-                                id="passwordToggle"
-                            >
-                                Ver
-                            </button>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="primary-button">
-                        Ingresar al laboratorio
-                        <span>→</span>
-                    </button>
-                </form>
-
-                <div class="demo-area">
-                    <div class="demo-title">
-                        Accesos de demostración
-                    </div>
-
-                    <div class="demo-users">
-                        <button
-                            type="button"
-                            class="demo-user"
-                            data-user="admin"
-                            data-password="admin123"
+                        <input
+                            class="input-control"
+                            type="text"
+                            id="username"
+                            name="username"
+                            value="<?= htmlspecialchars($username) ?>"
+                            placeholder="Ingresa tu usuario"
+                            required
+                            autofocus
                         >
-                            <span class="demo-user-info">
-                                <span class="demo-avatar">AD</span>
+                    </div>
+                </div>
 
-                                <span>
-                                    <strong>Administrador</strong>
-                                    <small>admin / admin123</small>
-                                </span>
-                            </span>
+                <div class="form-group">
+                    <label for="password">
+                        Contraseña
+                    </label>
 
-                            <span>Usar</span>
-                        </button>
+                    <div class="input-wrapper">
+                        <span class="input-icon">◆</span>
+
+                        <input
+                            class="input-control"
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Ingresa tu contraseña"
+                            required
+                        >
 
                         <button
                             type="button"
-                            class="demo-user"
-                            data-user="analista"
-                            data-password="fiis2026"
+                            class="password-toggle"
+                            id="passwordToggle"
                         >
-                            <span class="demo-user-info">
-                                <span class="demo-avatar">AN</span>
-
-                                <span>
-                                    <strong>Analista</strong>
-                                    <small>analista / fiis2026</small>
-                                </span>
-                            </span>
-
-                            <span>Usar</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            class="demo-user"
-                            data-user="usuario"
-                            data-password="password"
-                        >
-                            <span class="demo-user-info">
-                                <span class="demo-avatar">US</span>
-
-                                <span>
-                                    <strong>Usuario</strong>
-                                    <small>usuario / password</small>
-                                </span>
-                            </span>
-
-                            <span>Usar</span>
+                            Ver
                         </button>
                     </div>
                 </div>
-            </div>
 
-            <p class="login-note">
-                Aplicación deliberadamente vulnerable.
-                No utilizar información real.
-            </p>
+                <button type="submit" class="primary-button">
+                    Ingresar al sistema
+                    <span>→</span>
+                </button>
+            </form>
         </div>
-    </section>
+
+        <p class="login-note">
+            Service Desk FIIS · Soporte y mesa de ayuda
+        </p>
+    </main>
 </div>
 
 <script src="/assets/app.js"></script>
 
 <script>
-const usernameInput = document.getElementById('username');
 const passwordInput = document.getElementById('password');
 const passwordToggle = document.getElementById('passwordToggle');
-
-document.querySelectorAll('.demo-user').forEach((button) => {
-    button.addEventListener('click', () => {
-        usernameInput.value = button.dataset.user;
-        passwordInput.value = button.dataset.password;
-        passwordInput.focus();
-    });
-});
 
 passwordToggle.addEventListener('click', () => {
     const passwordIsHidden = passwordInput.type === 'password';

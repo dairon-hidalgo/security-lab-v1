@@ -1,4 +1,4 @@
-# Módulo 10 — XSS DOM
+# XSS DOM
 
 ## Objetivo
 
@@ -14,7 +14,7 @@ El fragmento situado después de `#` no se envía al servidor. Es leído y proce
 ## Ruta
 
 ```text
-http://localhost:8081/xss-dom.php
+http://localhost:8090/soporte/anuncios#frag
 ```
 
 ## Prueba visual
@@ -26,8 +26,8 @@ El colector rechaza `SECURITYLABSESSID` y cualquier cookie diferente de `LAB_XSS
 ## Verificación
 
 ```powershell
-docker compose exec app php -l /var/www/html/xss-dom.php
-docker compose exec app php -l /var/www/html/xss-dom-collector.php
+docker compose exec app php -l /var/www/html/soporte/anuncios.php
+docker compose exec app php -l /var/www/html/api/capturar-cookie-dom.php
 ```
 
 ## Consultar evidencias

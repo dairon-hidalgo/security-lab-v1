@@ -1,65 +1,5 @@
 (() => {
-    const root = document.documentElement;
-    const savedTheme = localStorage.getItem("securityLabTheme");
-
-    if (savedTheme === "dark" || savedTheme === "light") {
-        root.dataset.theme = savedTheme;
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        root.dataset.theme = "dark";
-    }
-
-    function currentTheme() {
-        return root.dataset.theme === "dark" ? "dark" : "light";
-    }
-
-    function updateThemeButtons() {
-        const dark = currentTheme() === "dark";
-
-        document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
-            button.setAttribute(
-                "aria-label",
-                dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"
-            );
-
-            button.querySelector("[data-theme-label]")?.replaceChildren(
-                document.createTextNode(dark ? "Modo claro" : "Modo oscuro")
-            );
-
-            const moon = button.querySelector("[data-theme-moon]");
-            const sun = button.querySelector("[data-theme-sun]");
-
-            if (moon) {
-                moon.hidden = dark;
-            }
-
-            if (sun) {
-                sun.hidden = !dark;
-            }
-        });
-    }
-
-    function toggleTheme() {
-        const nextTheme = currentTheme() === "dark" ? "light" : "dark";
-
-        root.dataset.theme = nextTheme;
-        localStorage.setItem("securityLabTheme", nextTheme);
-        updateThemeButtons();
-
-        showToast(
-            nextTheme === "dark"
-                ? "Modo oscuro activado"
-                : "Modo claro activado",
-            "success"
-        );
-    }
-
     document.addEventListener("click", (event) => {
-        const themeButton = event.target.closest("[data-theme-toggle]");
-
-        if (themeButton) {
-            toggleTheme();
-        }
-
         const sidebarButton = event.target.closest("[data-sidebar-toggle]");
 
         if (sidebarButton) {
@@ -82,25 +22,6 @@
             const overlay = document.createElement("div");
             overlay.className = "sidebar-overlay";
             document.body.appendChild(overlay);
-        }
-    }
-
-    function ensureFloatingThemeButton() {
-        if (
-            !document.querySelector("[data-theme-toggle]") &&
-            document.body.classList.contains("login-body")
-        ) {
-            const button = document.createElement("button");
-
-            button.type = "button";
-            button.className = "floating-theme-button";
-            button.dataset.themeToggle = "";
-            button.innerHTML = `
-                <span data-theme-moon>☾</span>
-                <span data-theme-sun hidden>☀</span>
-            `;
-
-            document.body.appendChild(button);
         }
     }
 
@@ -148,8 +69,6 @@
     };
 
     ensureSidebarOverlay();
-    ensureFloatingThemeButton();
-    updateThemeButtons();
 
     const firstDashboardVisit = sessionStorage.getItem(
         "securityLabDashboardVisited"

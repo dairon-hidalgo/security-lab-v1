@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/db.php';
-require_once __DIR__ . '/session.php';
+require_once __DIR__ . '/../includes/helpers.php';
 
 require_login();
 
@@ -16,13 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $user = current_user();
+$pdo = db();
+
 $rawCookie = trim((string) ($_POST['cookie'] ?? ''));
 $pageUrl = substr(trim((string) ($_POST['page'] ?? '')), 0, 1000);
 
 /*
- * El colector del laboratorio acepta exclusivamente la cookie ficticia
- * LAB_XSS_DEMO. De este modo se demuestra el flujo sin almacenar la cookie
- * de sesión ni enviar información a un servidor externo.
+ * El punto de captura acepta exclusivamente la cookie ficticia LAB_XSS_DEMO.
  */
 if (!preg_match('/^LAB_XSS_DEMO=([A-Za-z0-9._-]{1,200})$/', $rawCookie, $matches)) {
     http_response_code(422);
@@ -32,8 +31,6 @@ if (!preg_match('/^LAB_XSS_DEMO=([A-Za-z0-9._-]{1,200})$/', $rawCookie, $matches
     ]);
     exit;
 }
-
-$pdo = db();
 
 $pdo->exec(
     'CREATE TABLE IF NOT EXISTS xss_cookie_captures (

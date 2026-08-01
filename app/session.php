@@ -32,7 +32,7 @@ function is_authenticated(): bool
 function require_login(): void
 {
     if (!is_authenticated()) {
-        header('Location: /login.php');
+        header('Location: /login');
         exit;
     }
 }

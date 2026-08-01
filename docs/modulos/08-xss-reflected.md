@@ -1,8 +1,8 @@
-# Módulo 08 — XSS Reflected
+# XSS Reflected
 
 ## Ruta
 
-`http://localhost:8081/xss-reflected.php`
+`http://localhost:8090/soporte/buscar?q=`
 
 ## Objetivo académico
 

@@ -18,7 +18,7 @@ docker compose up -d --build
 
 ## Abrir la aplicación
 
-http://localhost:8081
+http://localhost:8090
 
 ## Revisar contenedores
 

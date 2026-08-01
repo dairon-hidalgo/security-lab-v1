@@ -1,4 +1,4 @@
-# Módulo 09 — XSS Stored
+# XSS Stored
 
 ## Objetivo
 
@@ -9,7 +9,7 @@ codificación de salida.
 ## Ruta
 
 ```text
-http://localhost:8081/xss-stored.php
+http://localhost:8090/soporte/comentarios
 ```
 
 ## Flujo del escenario
@@ -19,7 +19,7 @@ http://localhost:8081/xss-stored.php
 3. La página recupera el comentario y lo inserta directamente en el HTML.
 4. El navegador interpreta las etiquetas o eventos incluidos.
 5. La demostración de cookie envía únicamente `LAB_XSS_DEMO` al colector local
-   `/xss-collector.php`.
+   `/api/capturar-cookie`.
 
 ## Límites de seguridad del laboratorio
 

@@ -1,10 +1,10 @@
-# Módulo 07 — Carga insegura de archivos
+# Carga insegura de archivos
 
 El módulo demuestra una carga insegura dentro de un entorno local y autorizado.
 
 ## Ruta
 
-`http://localhost:8081/upload.php`
+`http://localhost:8090/tickets/adjuntos`
 
 ## Archivo de prueba incluido
 
@@ -15,7 +15,7 @@ No incluye reverse shell, persistencia ni conexiones externas.
 
 Después de cargarla, se puede abrir mediante una URL similar a:
 
-`http://localhost:8081/uploads/lab-shell.php?cmd=id`
+`http://localhost:8090/uploads/lab-shell.php?cmd=id`
 
 Comandos permitidos:
 

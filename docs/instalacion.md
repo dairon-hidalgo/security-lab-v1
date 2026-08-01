@@ -17,4 +17,4 @@ docker compose up -d --build
 
 4. Abrir:
 
-http://localhost:8081
+http://localhost:8090
