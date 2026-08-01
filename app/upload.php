@@ -8,6 +8,8 @@ require_once __DIR__ . '/icons.php';
 
 require_login();
 
+const MAX_UPLOAD_BYTES = 2097152;
+
 $user = current_user();
 $pdo = db();
 
@@ -43,114 +45,204 @@ function upload_user_initials(array $user): string
     return $initials !== '' ? $initials : 'U';
 }
 
-function upload_public_url(string $fileName): string
+function upload_storage_directory(): string
 {
-    return '/uploads/' . rawurlencode($fileName);
+    return getenv('UPLOAD_STORAGE_PATH') ?: '/var/www/storage/uploads';
+}
+
+function upload_download_url(string $storedName): string
+{
+    return '/download.php?file=' . rawurlencode($storedName);
+}
+
+function allowed_upload_types(): array
+{
+    return [
+        'pdf' => ['application/pdf'],
+        'png' => ['image/png'],
+        'jpg' => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'txt' => ['text/plain'],
+    ];
+}
+
+function upload_pg_boolean(mixed $value): bool
+{
+    return $value === true
+        || $value === 1
+        || $value === '1'
+        || $value === 't'
+        || $value === 'true';
 }
 
 $userInitials = upload_user_initials($user);
-$uploadDirectory = __DIR__ . '/uploads';
+$uploadDirectory = upload_storage_directory();
 $successMessage = null;
 $errorMessage = null;
 $uploadedUrl = null;
 
-if (!is_dir($uploadDirectory)) {
-    mkdir($uploadDirectory, 0777, true);
+if (!is_dir($uploadDirectory) && !mkdir($uploadDirectory, 0750, true)) {
+    throw new RuntimeException(
+        'No fue posible preparar el almacenamiento seguro.'
+    );
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $file = $_FILES['evidence'] ?? null;
+    $submittedToken = isset($_POST['csrf_token'])
+        ? (string) $_POST['csrf_token']
+        : null;
 
-    if (!is_array($file)) {
+    $originalName = 'archivo-sin-nombre';
+    $storedName = '(rechazado)';
+    $detectedMime = 'application/octet-stream';
+    $fileSize = 0;
+    $wasSuccessful = false;
+
+    if (!csrf_token_is_valid($submittedToken)) {
+        http_response_code(400);
+        $errorMessage = 'La solicitud no es válida. Actualiza la página.';
+    } elseif (!is_array($file)) {
         $errorMessage = 'No se recibió ningún archivo.';
     } elseif (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-        $errorMessage = 'PHP rechazó la carga con el código ' .
-            (string) ($file['error'] ?? UPLOAD_ERR_NO_FILE) . '.';
+        $errorMessage = 'La carga no pudo ser procesada.';
     } else {
-        $originalName = (string) ($file['name'] ?? 'archivo-sin-nombre');
+        $originalName = substr(
+            basename((string) ($file['name'] ?? 'archivo-sin-nombre')),
+            0,
+            255
+        );
 
-        /*
-         * Vulnerabilidad intencional del laboratorio:
-         * - Solo se elimina la ruta aportada por el cliente.
-         * - No se valida la extensión.
-         * - No se verifica el contenido real.
-         * - Se conserva el nombre y la extensión original.
-         * - El archivo se guarda dentro del webroot.
-         * - Un archivo PHP puede ejecutarse al abrir su URL.
-         */
-        $storedName = basename($originalName);
-        $destination = $uploadDirectory . DIRECTORY_SEPARATOR . $storedName;
-        $reportedMime = (string) ($file['type'] ?? 'application/octet-stream');
+        $temporaryPath = (string) ($file['tmp_name'] ?? '');
         $fileSize = (int) ($file['size'] ?? 0);
-        $wasSuccessful = move_uploaded_file(
-            (string) ($file['tmp_name'] ?? ''),
-            $destination
+        $extension = strtolower(
+            pathinfo($originalName, PATHINFO_EXTENSION)
         );
 
-        if ($wasSuccessful) {
-            @chmod($destination, 0644);
-            $uploadedUrl = upload_public_url($storedName);
-            $successMessage = 'El archivo fue almacenado dentro del directorio público.';
+        if ($fileSize <= 0 || $fileSize > MAX_UPLOAD_BYTES) {
+            $errorMessage =
+                'El archivo debe tener un tamaño mayor que 0 y no superar 2 MB.';
+        } elseif (!array_key_exists($extension, allowed_upload_types())) {
+            $errorMessage =
+                'Extensión rechazada. Solo se permiten PDF, PNG, JPG y TXT.';
+        } elseif (!is_uploaded_file($temporaryPath)) {
+            $errorMessage = 'El origen temporal del archivo no es válido.';
         } else {
-            $errorMessage = 'No fue posible mover el archivo al directorio uploads.';
+            $fileInfo = new finfo(FILEINFO_MIME_TYPE);
+            $detectedMime = (string) $fileInfo->file($temporaryPath);
+
+            if (
+                !in_array(
+                    $detectedMime,
+                    allowed_upload_types()[$extension],
+                    true
+                )
+            ) {
+                $errorMessage =
+                    'El contenido real del archivo no coincide con su extensión.';
+            } else {
+                $normalizedExtension = $extension === 'jpeg'
+                    ? 'jpg'
+                    : $extension;
+
+                $storedName =
+                    bin2hex(random_bytes(16))
+                    . '.'
+                    . $normalizedExtension;
+
+                $destination =
+                    $uploadDirectory
+                    . DIRECTORY_SEPARATOR
+                    . $storedName;
+
+                $wasSuccessful = move_uploaded_file(
+                    $temporaryPath,
+                    $destination
+                );
+
+                if ($wasSuccessful) {
+                    chmod($destination, 0640);
+                    $uploadedUrl = upload_download_url($storedName);
+                    $successMessage =
+                        'El archivo fue validado, renombrado y almacenado '
+                        . 'fuera del directorio público.';
+                } else {
+                    $errorMessage =
+                        'No fue posible almacenar el archivo de forma segura.';
+                }
+            }
         }
-
-        $statement = $pdo->prepare(
-            'INSERT INTO upload_attempts (
-                user_id,
-                original_name,
-                stored_name,
-                reported_mime,
-                file_size,
-                was_successful,
-                public_url,
-                ip_address,
-                user_agent
-            ) VALUES (
-                :user_id,
-                :original_name,
-                :stored_name,
-                :reported_mime,
-                :file_size,
-                :was_successful,
-                :public_url,
-                :ip_address,
-                :user_agent
-            )'
-        );
-
-        $statement->execute([
-            ':user_id' => (int) ($user['id'] ?? 0),
-            ':original_name' => $originalName,
-            ':stored_name' => $storedName,
-            ':reported_mime' => $reportedMime,
-            ':file_size' => $fileSize,
-            ':was_successful' => $wasSuccessful,
-            ':public_url' => $wasSuccessful ? $uploadedUrl : null,
-            ':ip_address' => (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'),
-            ':user_agent' => (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown'),
-        ]);
     }
+
+    $statement = $pdo->prepare(
+        'INSERT INTO upload_attempts (
+            user_id,
+            original_name,
+            stored_name,
+            reported_mime,
+            file_size,
+            was_successful,
+            public_url,
+            ip_address,
+            user_agent
+        ) VALUES (
+            :user_id,
+            :original_name,
+            :stored_name,
+            :reported_mime,
+            :file_size,
+            :was_successful,
+            :public_url,
+            :ip_address,
+            :user_agent
+        )'
+    );
+
+    $statement->execute([
+        ':user_id' => (int) ($user['id'] ?? 0),
+        ':original_name' => $originalName,
+        ':stored_name' => $storedName,
+        ':reported_mime' => $detectedMime,
+        ':file_size' => $fileSize,
+        ':was_successful' => $wasSuccessful,
+        ':public_url' => $wasSuccessful ? $uploadedUrl : null,
+        ':ip_address' => (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'),
+        ':user_agent' => (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown'),
+    ]);
 }
 
 $uploadedFiles = [];
 
-foreach (glob($uploadDirectory . '/*') ?: [] as $path) {
+$storedRows = $pdo->query(
+    'SELECT DISTINCT ON (stored_name)
+        stored_name,
+        original_name,
+        reported_mime,
+        file_size,
+        uploaded_at
+     FROM upload_attempts
+     WHERE was_successful = TRUE
+       AND stored_name <> \'\'
+       AND stored_name <> \'(rechazado)\'
+     ORDER BY stored_name, uploaded_at DESC'
+)->fetchAll();
+
+foreach ($storedRows as $row) {
+    $storedName = (string) $row['stored_name'];
+    $path = $uploadDirectory . DIRECTORY_SEPARATOR . $storedName;
+
     if (!is_file($path)) {
         continue;
     }
 
-    $fileName = basename($path);
-
-    if ($fileName === '.gitkeep') {
-        continue;
-    }
-
     $uploadedFiles[] = [
-        'name' => $fileName,
-        'size' => filesize($path) ?: 0,
-        'url' => upload_public_url($fileName),
-        'modified_at' => date('Y-m-d H:i:s', filemtime($path) ?: time()),
+        'name' => (string) $row['original_name'],
+        'size' => filesize($path) ?: (int) $row['file_size'],
+        'url' => upload_download_url($storedName),
+        'modified_at' => date(
+            'Y-m-d H:i:s',
+            filemtime($path) ?: time()
+        ),
     ];
 }
 
@@ -175,15 +267,6 @@ $recentAttempts = $pdo->query(
      ORDER BY upload_attempts.uploaded_at DESC
      LIMIT 15'
 )->fetchAll();
-
-function upload_pg_boolean(mixed $value): bool
-{
-    return $value === true
-        || $value === 1
-        || $value === '1'
-        || $value === 't'
-        || $value === 'true';
-}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -214,7 +297,7 @@ function upload_pg_boolean(mixed $value): bool
 
             <div>
                 <strong>Service Desk FIIS</strong>
-                <span>Security Lab · V1</span>
+                <span>Security Lab · V2</span>
             </div>
         </div>
 
@@ -282,7 +365,7 @@ function upload_pg_boolean(mixed $value): bool
 
                 <div class="page-title">
                     <h1>Carga de archivos</h1>
-                    <p>Validación incompleta y almacenamiento dentro del directorio público</p>
+                    <p>Validación estricta y almacenamiento fuera del directorio público</p>
                 </div>
             </div>
 
@@ -313,17 +396,17 @@ function upload_pg_boolean(mixed $value): bool
 
             <section class="module-hero">
                 <div class="module-hero-number">MÓDULO 07 · OWASP A04</div>
-                <h1>Carga insegura de evidencias</h1>
+                <h1>Carga segura de evidencias</h1>
                 <p>
-                    La aplicación confía en el nombre y tipo reportados por el cliente,
-                    conserva la extensión y almacena el archivo dentro del webroot.
+                    La V2 valida extensión, tamaño y MIME real, genera un nombre
+                    aleatorio y almacena el archivo fuera del webroot.
                 </p>
             </section>
 
-            <div class="warning-box">
-                <strong>Vulnerabilidad intencional:</strong>
-                no existe lista permitida de extensiones, análisis de contenido,
-                renombrado seguro ni aislamiento fuera del directorio público.
+            <div class="alert alert-success">
+                <strong>Controles aplicados:</strong>
+                token CSRF, límite de 2 MB, lista de tipos permitidos,
+                validación MIME, nombre aleatorio y descarga forzada.
             </div>
 
             <section class="module-layout">
@@ -331,7 +414,7 @@ function upload_pg_boolean(mixed $value): bool
                     <div class="section-heading">
                         <div>
                             <h2>Subir evidencia</h2>
-                            <p>El archivo conservará su nombre y extensión originales.</p>
+                            <p>Formatos permitidos: PDF, PNG, JPG y TXT; máximo 2 MB.</p>
                         </div>
                     </div>
 
@@ -340,6 +423,12 @@ function upload_pg_boolean(mixed $value): bool
                         action="/upload.php"
                         enctype="multipart/form-data"
                     >
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>"
+                        >
+
                         <div class="form-group">
                             <label for="evidence">Seleccionar archivo</label>
 
@@ -348,6 +437,7 @@ function upload_pg_boolean(mixed $value): bool
                                 id="evidence"
                                 name="evidence"
                                 type="file"
+                                accept=".pdf,.png,.jpg,.jpeg,.txt"
                                 required
                             >
                         </div>
@@ -363,7 +453,7 @@ function upload_pg_boolean(mixed $value): bool
 
                             <?php if ($uploadedUrl !== null): ?>
                                 <br>
-                                URL pública:
+                                Descarga segura:
                                 <a
                                     href="<?= htmlspecialchars($uploadedUrl) ?>"
                                     target="_blank"
@@ -382,7 +472,7 @@ function upload_pg_boolean(mixed $value): bool
                     <?php endif; ?>
 
                     <div style="margin-top: 26px;">
-                        <h3>Archivos disponibles por URL</h3>
+                        <h3>Evidencias almacenadas de forma segura</h3>
 
                         <div class="project-module-table-wrapper">
                             <table class="info-table">
@@ -419,7 +509,7 @@ function upload_pg_boolean(mixed $value): bool
                                                 target="_blank"
                                                 rel="noopener"
                                             >
-                                                Abrir URL
+                                                Descargar
                                             </a>
                                         </td>
                                     </tr>
@@ -431,7 +521,7 @@ function upload_pg_boolean(mixed $value): bool
                 </article>
 
                 <aside class="module-status-card">
-                    <h3>Flujo vulnerable</h3>
+                    <h3>Flujo seguro</h3>
 
                     <div class="status-list">
                         <div class="status-item">
@@ -441,17 +531,17 @@ function upload_pg_boolean(mixed $value): bool
 
                         <div class="status-item">
                             <span class="status-circle">2</span>
-                            Extensión sin validar
+                            Extensión y MIME validados
                         </div>
 
                         <div class="status-item">
                             <span class="status-circle">3</span>
-                            Nombre original conservado
+                            Nombre aleatorio generado
                         </div>
 
                         <div class="status-item">
                             <span class="status-circle">4</span>
-                            Archivo servido desde webroot
+                            Almacenado fuera del webroot
                         </div>
                     </div>
 
@@ -470,11 +560,11 @@ function upload_pg_boolean(mixed $value): bool
                         </tr>
                         <tr>
                             <th>Destino</th>
-                            <td><code>/uploads/</code></td>
+                            <td><code>/var/www/storage/uploads</code></td>
                         </tr>
                         <tr>
                             <th>Ejecución PHP</th>
-                            <td>Habilitada</td>
+                            <td>Deshabilitada</td>
                         </tr>
                     </table>
                 </aside>
@@ -494,7 +584,7 @@ function upload_pg_boolean(mixed $value): bool
                         <tr>
                             <th>Usuario</th>
                             <th>Archivo</th>
-                            <th>MIME reportado</th>
+                            <th>MIME detectado</th>
                             <th>Tamaño</th>
                             <th>Resultado</th>
                             <th>Fecha</th>
@@ -552,7 +642,7 @@ function upload_pg_boolean(mixed $value): bool
         </main>
 
         <footer class="footer">
-            Service Desk FIIS · Laboratorio local y autorizado
+            Service Desk FIIS V2 · Carga segura de archivos
         </footer>
     </section>
 </div>

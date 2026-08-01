@@ -25,30 +25,59 @@ function short_text(string $value, int $limit = 85): string
     return substr($value, 0, $limit - 3) . '...';
 }
 
+function allowed_diagnostic_targets(): array
+{
+    return [
+        '127.0.0.1' => 'Interfaz local del contenedor',
+        'localhost' => 'Nombre local del contenedor',
+        'db' => 'Servicio PostgreSQL interno',
+    ];
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $target = trim((string) ($_POST['target'] ?? ''));
+    $submittedToken = isset($_POST['csrf_token'])
+        ? (string) $_POST['csrf_token']
+        : null;
 
-    if ($target === '') {
-        $errorMessage = 'Ingresa una dirección IP o nombre de host.';
+    if (!csrf_token_is_valid($submittedToken)) {
+        http_response_code(400);
+        $errorMessage = 'La solicitud no es válida. Actualiza la página.';
+    } elseif ($target === '') {
+        $errorMessage = 'Selecciona un destino permitido.';
+    } elseif (!array_key_exists($target, allowed_diagnostic_targets())) {
+        http_response_code(422);
+        $errorMessage =
+            'El destino fue rechazado. La V2 utiliza una lista cerrada '
+            . 'y no ejecuta entradas arbitrarias.';
     } else {
         /*
-         * Vulnerabilidad intencional de la V1:
-         *
-         * La entrada se concatena directamente dentro de un comando
-         * interpretado por el shell del sistema.
-         *
-         * En una versión segura se debería validar la dirección,
-         * evitar el shell y emplear funciones con argumentos separados.
+         * V2 segura:
+         * - No se construye ningún comando del sistema.
+         * - No se utiliza shell_exec(), exec(), system() ni passthru().
+         * - El destino pertenece a una lista cerrada.
+         * - La resolución se realiza con funciones nativas de PHP.
          */
-        $executedCommand = 'ping -c 1 ' . $target;
+        $executedCommand = 'Resolución DNS nativa de PHP (sin shell)';
 
-        $rawOutput = shell_exec(
-            $executedCommand . ' 2>&1'
+        if (filter_var($target, FILTER_VALIDATE_IP) !== false) {
+            $resolvedAddress = $target;
+        } else {
+            $resolvedAddress = gethostbyname($target);
+        }
+
+        $description = allowed_diagnostic_targets()[$target];
+
+        $commandOutput = implode(
+            PHP_EOL,
+            [
+                'Entrada validada: ' . $target,
+                'Destino autorizado: ' . $description,
+                'Dirección resuelta: ' . $resolvedAddress,
+                'Shell del sistema: no utilizado',
+                'Resultado: diagnóstico procesado de forma segura',
+            ]
         );
-
-        $commandOutput = $rawOutput !== null
-            ? substr($rawOutput, 0, 12000)
-            : 'El proceso no devolvió información.';
 
         $statement = $pdo->prepare(
             'INSERT INTO command_attempts (
@@ -149,7 +178,7 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
 
             <div>
                 <strong>Service Desk FIIS</strong>
-                <span>Security Lab · V1</span>
+                <span>Security Lab · V2</span>
             </div>
         </div>
 
@@ -267,15 +296,15 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
                 <h1>Diagnóstico de conectividad</h1>
 
                 <p>
-                    La aplicación construye un comando del sistema utilizando
-                    directamente el valor recibido desde el formulario.
+                    La V2 valida el destino contra una lista cerrada y utiliza
+                    funciones nativas de PHP, sin invocar el shell.
                 </p>
             </section>
 
-            <div class="warning-box">
-                <strong>Vulnerabilidad intencional:</strong>
-                la entrada no se valida ni se separa del comando que será
-                interpretado por el shell del contenedor.
+            <div class="alert alert-success">
+                <strong>Control aplicado:</strong>
+                lista cerrada de destinos, token CSRF y diagnóstico nativo
+                de PHP sin ejecución de comandos del sistema.
             </div>
 
             <section class="module-layout">
@@ -285,7 +314,7 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
                             <h2>Comprobar conectividad</h2>
 
                             <p>
-                                Ingresa una IP o nombre de host del entorno local.
+                                Selecciona un destino interno autorizado.
                             </p>
                         </div>
                     </div>
@@ -297,20 +326,32 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
                     <?php endif; ?>
 
                     <form method="post" action="/command.php">
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                         <div class="form-group">
                             <label for="target">
                                 Dirección IP o nombre de host
                             </label>
 
-                            <input
+                            <select
                                 class="input-control"
-                                type="text"
                                 id="target"
                                 name="target"
-                                value="<?= htmlspecialchars($target) ?>"
-                                placeholder="Ejemplo: 127.0.0.1"
                                 required
                             >
+                                <option value="">Selecciona un destino</option>
+                                <?php foreach (allowed_diagnostic_targets() as $value => $label): ?>
+                                    <option
+                                        value="<?= htmlspecialchars($value) ?>"
+                                        <?= $target === $value ? 'selected' : '' ?>
+                                    >
+                                        <?= htmlspecialchars($value . ' — ' . $label) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
 
                         <button type="submit" class="primary-button">
@@ -321,7 +362,7 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
 
                     <?php if ($executedCommand !== ''): ?>
                         <div style="margin-top: 25px;">
-                            <h3>Comando construido</h3>
+                            <h3>Operación aplicada</h3>
 
                             <pre class="terminal-output"><code><?= htmlspecialchars(
                                 $executedCommand
@@ -331,7 +372,7 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
 
                     <?php if ($commandOutput !== null): ?>
                         <div style="margin-top: 20px;">
-                            <h3>Resultado del proceso</h3>
+                            <h3>Resultado del diagnóstico</h3>
 
                             <pre class="terminal-output"><?= htmlspecialchars(
                                 $commandOutput
@@ -353,19 +394,19 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
                         <div class="status-item">
                             <span class="status-circle">2</span>
 
-                            Concatenación directa
+                            Validación mediante lista cerrada
                         </div>
 
                         <div class="status-item">
                             <span class="status-circle">3</span>
 
-                            Ejecución mediante shell
+                            Resolución nativa de PHP
                         </div>
 
                         <div class="status-item">
                             <span class="status-circle">4</span>
 
-                            Resultado visible
+                            Shell deshabilitado
                         </div>
                     </div>
 
@@ -375,13 +416,13 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
 
                     <table class="info-table">
                         <tr>
-                            <th>Usuario web</th>
-                            <td><code>www-data</code></td>
+                            <th>Ejecución de shell</th>
+                            <td>Deshabilitada</td>
                         </tr>
 
                         <tr>
-                            <th>Sistema</th>
-                            <td>Contenedor Linux</td>
+                            <th>Destinos</th>
+                            <td>localhost, 127.0.0.1 y db</td>
                         </tr>
 
                         <tr>
@@ -391,7 +432,7 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
 
                         <tr>
                             <th>Exposición</th>
-                            <td>localhost:8081</td>
+                            <td>localhost:8082</td>
                         </tr>
                     </table>
                 </aside>
@@ -403,7 +444,7 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
                         <h2>Historial reciente</h2>
 
                         <p>
-                            Últimas ejecuciones registradas por el laboratorio.
+                            Últimos diagnósticos seguros registrados.
                         </p>
                     </div>
 
@@ -419,7 +460,7 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
                             <th>Fecha</th>
                             <th>Usuario</th>
                             <th>Entrada</th>
-                            <th>Comando</th>
+                            <th>Operación</th>
                             <th>IP</th>
                         </tr>
                         </thead>
@@ -428,7 +469,7 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
                         <?php if ($recentExecutions === []): ?>
                             <tr>
                                 <td colspan="5">
-                                    No existen ejecuciones registradas.
+                                    No existen diagnósticos registrados.
                                 </td>
                             </tr>
                         <?php endif; ?>
@@ -487,7 +528,7 @@ foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
         </main>
 
         <footer class="footer">
-            FIIS Security Lab · Módulo 02 · Entorno controlado
+            FIIS Security Lab V2 · Módulo 02 · Entorno seguro
         </footer>
     </section>
 </div>

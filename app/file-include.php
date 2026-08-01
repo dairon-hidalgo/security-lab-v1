@@ -11,6 +11,17 @@ require_login();
 $user = current_user();
 $pdo = db();
 
+$allowedResources = [
+    'pages/home.php' => [
+        'path' => __DIR__ . '/pages/home.php',
+        'label' => 'Página principal',
+    ],
+    'pages/help.php' => [
+        'path' => __DIR__ . '/pages/help.php',
+        'label' => 'Centro de ayuda',
+    ],
+];
+
 $resource = trim(
     (string) ($_GET['page'] ?? 'pages/home.php')
 );
@@ -18,37 +29,38 @@ $resource = trim(
 $includeOutput = '';
 $errorMessage = null;
 $wasSuccessful = false;
+$resourceType = 'lista permitida';
 
-$isRemote = preg_match(
-    '#^https?://#i',
-    $resource
-) === 1;
-
-$resourceType = $isRemote ? 'remoto' : 'local';
-
-/*
- * La inclusión remota se limita al servicio interno de Docker.
- * No se permiten direcciones remotas de Internet.
- */
-if (
-    $isRemote
-    && !str_starts_with(
-        strtolower($resource),
-        'http://rfi-source/'
-    )
-) {
+if (!array_key_exists($resource, $allowedResources)) {
+    http_response_code(422);
+    $resourceType = 'rechazado';
     $errorMessage =
-        'La demostración remota está limitada al servicio interno rfi-source.';
+        'El recurso solicitado no pertenece a la lista permitida de la V2.';
 } else {
-    ob_start();
+    $pagesRoot = realpath(__DIR__ . '/pages');
+    $selectedPath = realpath($allowedResources[$resource]['path']);
 
-    $includeResult = @include $resource;
-
-    $includeOutput = (string) ob_get_clean();
-    $wasSuccessful = $includeResult !== false;
-
-    if (!$wasSuccessful) {
-        $errorMessage = 'No fue posible incluir el recurso solicitado.';
+    if (
+        $pagesRoot === false
+        || $selectedPath === false
+        || !str_starts_with(
+            $selectedPath,
+            $pagesRoot . DIRECTORY_SEPARATOR
+        )
+    ) {
+        http_response_code(500);
+        $resourceType = 'error interno';
+        $errorMessage = 'No fue posible cargar el recurso autorizado.';
+    } else {
+        /*
+         * V2 segura:
+         * la entrada del usuario nunca se usa como ruta. La clave se
+         * resuelve contra una lista cerrada y se verifica con realpath().
+         */
+        ob_start();
+        include $selectedPath;
+        $includeOutput = (string) ob_get_clean();
+        $wasSuccessful = true;
     }
 }
 
@@ -190,7 +202,7 @@ function short_resource(string $value, int $limit = 65): string
 
             <div>
                 <strong>Service Desk FIIS</strong>
-                <span>Security Lab · V1</span>
+                <span>Security Lab · V2</span>
             </div>
         </div>
 
@@ -245,7 +257,7 @@ function short_resource(string $value, int $limit = 65): string
                     <h1>Inclusión de archivos</h1>
 
                     <p>
-                        Laboratorio de inclusión local y remota
+                        Carga controlada de documentación interna
                     </p>
                 </div>
             </div>
@@ -285,19 +297,18 @@ function short_resource(string $value, int $limit = 65): string
                     MÓDULO 03 · FILE INCLUSION
                 </div>
 
-                <h1>Visor vulnerable de documentación</h1>
+                <h1>Visor seguro de documentación</h1>
 
                 <p>
-                    El valor recibido en el parámetro
-                    <code>page</code> se utiliza directamente en una
-                    instrucción de inclusión de PHP.
+                    La V2 resuelve el parámetro <code>page</code> contra
+                    una lista cerrada de recursos internos autorizados.
                 </p>
             </section>
 
-            <div class="warning-box">
-                <strong>Debilidad intencional:</strong>
-                no existe normalización de rutas ni una lista cerrada de
-                archivos permitidos.
+            <div class="alert alert-success">
+                <strong>Control aplicado:</strong>
+                lista permitida, validación con <code>realpath()</code> y
+                bloqueo total de rutas locales arbitrarias y recursos remotos.
             </div>
 
             <section class="module-layout">
@@ -307,7 +318,7 @@ function short_resource(string $value, int $limit = 65): string
                             <h2>Seleccionar recurso</h2>
 
                             <p>
-                                Carga una sección local o una fuente interna.
+                                Selecciona una sección interna autorizada.
                             </p>
                         </div>
                     </div>
@@ -318,14 +329,21 @@ function short_resource(string $value, int $limit = 65): string
                                 Ruta o recurso
                             </label>
 
-                            <input
+                            <select
                                 class="input-control"
-                                type="text"
                                 id="page"
                                 name="page"
-                                value="<?= htmlspecialchars($resource) ?>"
                                 required
                             >
+                                <?php foreach ($allowedResources as $key => $item): ?>
+                                    <option
+                                        value="<?= htmlspecialchars($key) ?>"
+                                        <?= $resource === $key ? 'selected' : '' ?>
+                                    >
+                                        <?= htmlspecialchars($item['label']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
 
                         <button type="submit" class="primary-button">
@@ -361,7 +379,7 @@ function short_resource(string $value, int $limit = 65): string
                 </article>
 
                 <aside class="module-status-card">
-                    <h3>Recursos del laboratorio</h3>
+                    <h3>Recursos permitidos</h3>
 
                     <div class="include-example-list">
                         <a
@@ -378,22 +396,6 @@ function short_resource(string $value, int $limit = 65): string
                         >
                             <strong>Centro de ayuda</strong>
                             <code>pages/help.php</code>
-                        </a>
-
-                        <a
-                            href="/file-include.php?page=/etc/hostname"
-                            class="include-example"
-                        >
-                            <strong>Archivo local del contenedor</strong>
-                            <code>/etc/hostname</code>
-                        </a>
-
-                        <a
-                            href="/file-include.php?page=http://rfi-source/remote-note.txt"
-                            class="include-example"
-                        >
-                            <strong>Fuente remota interna</strong>
-                            <code>http://rfi-source/remote-note.txt</code>
                         </a>
                     </div>
 
@@ -422,13 +424,13 @@ function short_resource(string $value, int $limit = 65): string
                         </tr>
 
                         <tr>
-                            <th>Función</th>
-                            <td><code>include</code></td>
+                            <th>Control</th>
+                            <td><code>allowlist + realpath</code></td>
                         </tr>
 
                         <tr>
-                            <th>RFI externa</th>
-                            <td>Bloqueada</td>
+                            <th>LFI/RFI</th>
+                            <td>Bloqueadas</td>
                         </tr>
                     </table>
                 </aside>
@@ -540,7 +542,7 @@ function short_resource(string $value, int $limit = 65): string
         </main>
 
         <footer class="footer">
-            FIIS Security Lab · Módulo 03 · Entorno local
+            FIIS Security Lab V2 · Módulo 03 · Entorno seguro
         </footer>
     </section>
 </div>

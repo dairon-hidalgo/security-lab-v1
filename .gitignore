@@ -22,3 +22,7 @@ pentest/evidence/*
 !pentest/evidence/.gitkeep
 # Documentos temporales
 REPARACION.md
+
+# Archivos cargados por la V2
+storage/uploads/*
+!storage/uploads/.gitkeep
