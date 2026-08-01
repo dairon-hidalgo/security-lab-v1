@@ -2286,3 +2286,83 @@ html[data-theme="dark"] .project-address {
     background: transparent;
     color: inherit;
 }
+/* Módulo de inclusión de archivos */
+
+.include-result {
+    overflow: hidden;
+    margin-top: 24px;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background: var(--surface-soft);
+}
+
+.include-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 14px 17px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.include-result-body {
+    min-height: 90px;
+    overflow: auto;
+    padding: 20px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.include-example-list {
+    display: grid;
+    gap: 10px;
+}
+
+.include-example {
+    display: block;
+    padding: 13px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--surface-soft);
+    color: var(--text);
+    text-decoration: none;
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.include-example:hover {
+    transform: translateX(3px);
+    border-color: var(--accent-500);
+}
+
+.include-example strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.include-example code {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.remote-execution-box {
+    padding: 18px;
+    border-left: 4px solid var(--violet-500);
+    border-radius: 10px;
+    background: rgba(139, 92, 246, 0.09);
+}
+
+.remote-execution-box p {
+    margin: 8px 0;
+}
+
+.remote-execution-box ul {
+    margin-bottom: 0;
+}

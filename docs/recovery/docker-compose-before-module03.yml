@@ -18,15 +18,6 @@ services:
     networks:
       - security_lab_network
 
-  rfi-source:
-    image: nginx:alpine
-    container_name: security-lab-rfi-source
-    restart: unless-stopped
-    volumes:
-      - ./rfi-source:/usr/share/nginx/html:ro
-    networks:
-      - security_lab_network
-
   app:
     build:
       context: ./app
@@ -46,8 +37,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      rfi-source:
-        condition: service_started
     networks:
       - security_lab_network
 

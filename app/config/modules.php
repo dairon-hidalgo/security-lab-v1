@@ -23,7 +23,7 @@ return [
         'number' => '03',
         'title' => 'Inclusión de archivos',
         'risk' => 'Alto',
-        'status' => 'Pendiente',
+        'status' => 'Implementado',
         'owasp' => 'A01:2021 — Broken Access Control',
         'url' => '/file-include.php',
     ],

@@ -1,0 +1,11 @@
+<?php
+
+echo '<div class="remote-execution-box">';
+echo '<strong>Inclusión remota ejecutada correctamente.</strong>';
+echo '<p>Este código fue descargado desde el servicio interno rfi-source.</p>';
+echo '<ul>';
+echo '<li>Usuario PHP: ' . htmlspecialchars(get_current_user()) . '</li>';
+echo '<li>Host de ejecución: ' . htmlspecialchars((string) gethostname()) . '</li>';
+echo '<li>Versión PHP: ' . htmlspecialchars(PHP_VERSION) . '</li>';
+echo '</ul>';
+echo '</div>';
