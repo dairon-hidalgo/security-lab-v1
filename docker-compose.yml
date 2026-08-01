@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:16
-    container_name: security-lab-db
+    container_name: security-lab-v2-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -20,7 +20,7 @@ services:
 
   rfi-source:
     image: nginx:alpine
-    container_name: security-lab-rfi-source
+    container_name: security-lab-v2-rfi-source
     restart: unless-stopped
     volumes:
       - ./rfi-source:/usr/share/nginx/html:ro
@@ -31,7 +31,7 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile
-    container_name: security-lab-app
+    container_name: security-lab-v2-app
     restart: unless-stopped
     ports:
       - "127.0.0.1:${APP_PORT}:80"
