@@ -11,6 +11,6 @@ RUN apt-get update \
     && a2enconf security-lab \
     && rm -rf /var/lib/apt/lists/*
 
-COPY php-v1.ini /usr/local/etc/php/conf.d/zz-security-lab-v1.ini
+COPY php-v2.ini /usr/local/etc/php/conf.d/zz-security-lab-v2.ini
 
 WORKDIR /var/www/html

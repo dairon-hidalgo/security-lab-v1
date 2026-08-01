@@ -6,6 +6,9 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/session.php';
 require_once __DIR__ . '/auth-log.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Pragma: no-cache');
+
 if (is_authenticated()) {
     header('Location: /dashboard.php');
     exit;
@@ -17,57 +20,96 @@ $username = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim((string) ($_POST['username'] ?? ''));
     $password = (string) ($_POST['password'] ?? '');
+    $submittedToken = isset($_POST['csrf_token'])
+        ? (string) $_POST['csrf_token']
+        : null;
 
-    try {
-        $pdo = db();
-
-        /*
-         * Debilidades intencionales de la V1:
-         * - Contraseñas almacenadas como texto plano.
-         * - Sin límite de intentos.
-         * - Sin bloqueo temporal.
-         * - Sin segundo factor.
-         */
-
-        $statement = $pdo->prepare(
-            'SELECT id, username, password, full_name, role
-             FROM users
-             WHERE username = :username
-             AND password = :password'
-        );
-
-        $statement->execute([
-            'username' => $username,
-            'password' => $password,
-        ]);
-
-        $user = $statement->fetch();
-
-        $wasSuccessful = $user !== false;
-
-        register_login_attempt(
-            $pdo,
-            $username,
-            $wasSuccessful
-        );
-
-        if ($wasSuccessful) {
-            $_SESSION['user'] = [
-                'id' => (int) $user['id'],
-                'username' => $user['username'],
-                'full_name' => $user['full_name'],
-                'role' => $user['role'],
-            ];
-
-            $_SESSION['login_time'] = date('Y-m-d H:i:s');
-
-            header('Location: /dashboard.php');
-            exit;
-        }
-
+    if (!csrf_token_is_valid($submittedToken)) {
+        http_response_code(400);
+        $errorMessage = 'La solicitud no es válida. Actualiza la página.';
+    } elseif (
+        $username === ''
+        || strlen($username) > 50
+        || strlen($password) > 200
+    ) {
         $errorMessage = 'Las credenciales ingresadas no son correctas.';
-    } catch (Throwable $exception) {
-        $errorMessage = 'No fue posible establecer conexión con el servicio.';
+    } else {
+        try {
+            $pdo = db();
+
+            if (login_is_temporarily_locked($pdo, $username)) {
+                http_response_code(429);
+
+                $errorMessage =
+                    'Demasiados intentos fallidos. Inténtalo nuevamente '
+                    . 'dentro de 15 minutos.';
+            } else {
+                $statement = $pdo->prepare(
+                    'SELECT id, username, password, full_name, role
+                     FROM users
+                     WHERE username = :username
+                     LIMIT 1'
+                );
+
+                $statement->execute([
+                    'username' => $username,
+                ]);
+
+                $user = $statement->fetch();
+
+                $wasSuccessful = $user !== false
+                    && password_verify(
+                        $password,
+                        (string) $user['password']
+                    );
+
+                register_login_attempt(
+                    $pdo,
+                    $username,
+                    $wasSuccessful
+                );
+
+                if ($wasSuccessful) {
+                    if (
+                        password_needs_rehash(
+                            (string) $user['password'],
+                            PASSWORD_DEFAULT
+                        )
+                    ) {
+                        $newHash = password_hash(
+                            $password,
+                            PASSWORD_DEFAULT
+                        );
+
+                        $update = $pdo->prepare(
+                            'UPDATE users
+                             SET password = :password
+                             WHERE id = :id'
+                        );
+
+                        $update->execute([
+                            'password' => $newHash,
+                            'id' => (int) $user['id'],
+                        ]);
+                    }
+
+                    establish_authenticated_session($user);
+
+                    header('Location: /dashboard.php');
+                    exit;
+                }
+
+                usleep(350000);
+
+                $errorMessage =
+                    'Las credenciales ingresadas no son correctas.';
+            }
+        } catch (Throwable $exception) {
+            error_log($exception->getMessage());
+
+            $errorMessage =
+                'No fue posible procesar el inicio de sesión.';
+        }
     }
 }
 ?>
@@ -112,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="brand-name">FIIS Security Lab</div>
 
                 <div class="brand-subtitle">
-                    Service Desk · Versión vulnerable
+                    Service Desk · Versión segura
                 </div>
             </div>
         </div>
@@ -162,12 +204,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div>
                     <div class="brand-name">FIIS Security Lab</div>
-                    <div class="brand-subtitle">Service Desk V1</div>
+                    <div class="brand-subtitle">Service Desk V2</div>
                 </div>
             </div>
 
             <div class="login-heading">
-                <span>Versión vulnerable</span>
+                <span>Versión segura</span>
 
                 <h2>Iniciar sesión</h2>
 
@@ -188,6 +230,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     action="/login.php"
                     autocomplete="off"
                 >
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>"
+                    >
                     <div class="form-group">
                         <label for="username">
                             Nombre de usuario
@@ -306,7 +353,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <p class="login-note">
-                Aplicación deliberadamente vulnerable.
+                Aplicación reforzada para comparar los controles de seguridad.
                 No utilizar información real.
             </p>
         </div>
