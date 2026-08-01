@@ -3,105 +3,185 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/session.php';
+require_once __DIR__ . '/icons.php';
 
 require_login();
 
 $user = current_user();
 
-$userInitials = strtoupper(
-    substr((string) $user['full_name'], 0, 1) .
-    substr(
-        (string) $user['full_name'],
-        (int) strpos((string) $user['full_name'], ' ') + 1,
-        1
-    )
+$nameParts = preg_split(
+    '/\s+/',
+    trim((string) ($user['full_name'] ?? 'Usuario'))
 );
+
+$userInitials = '';
+
+foreach (array_slice($nameParts ?: ['U'], 0, 2) as $part) {
+    $userInitials .= strtoupper(substr($part, 0, 1));
+}
 
 $modules = [
     [
         'number' => '01',
-        'icon' => 'BF',
+        'icon' => 'lock',
         'title' => 'Fuerza bruta',
         'description' => 'Autenticación sin bloqueo temporal, límite de intentos ni segundo factor.',
+        'risk' => 'Alto',
+        'risk_class' => 'risk-high',
+        'status' => 'En desarrollo',
+        'status_class' => 'status-development',
         'url' => '/login-security.php',
     ],
     [
         'number' => '02',
-        'icon' => 'RC',
+        'icon' => 'terminal',
         'title' => 'Ejecución de comandos',
         'description' => 'Estudio de entradas utilizadas por funciones del sistema operativo.',
+        'risk' => 'Crítico',
+        'risk_class' => 'risk-critical',
+        'status' => 'Pendiente',
+        'status_class' => 'status-pending',
         'url' => '/command.php',
     ],
     [
         'number' => '03',
-        'icon' => 'FI',
+        'icon' => 'folder',
         'title' => 'Inclusión de archivos',
         'description' => 'Evaluación de rutas, archivos locales y controles de inclusión.',
+        'risk' => 'Alto',
+        'risk_class' => 'risk-high',
+        'status' => 'Pendiente',
+        'status_class' => 'status-pending',
         'url' => '/file-include.php',
     ],
     [
         'number' => '04',
-        'icon' => 'SQ',
+        'icon' => 'database',
         'title' => 'SQL Injection',
         'description' => 'Consulta de información mediante parámetros controlados por el usuario.',
+        'risk' => 'Crítico',
+        'risk_class' => 'risk-critical',
+        'status' => 'Pendiente',
+        'status_class' => 'status-pending',
         'url' => '/sqli.php',
     ],
     [
         'number' => '05',
-        'icon' => 'BL',
+        'icon' => 'eye',
         'title' => 'Blind SQL Injection',
         'description' => 'Inferencia de información mediante respuestas verdaderas o falsas.',
+        'risk' => 'Crítico',
+        'risk_class' => 'risk-critical',
+        'status' => 'Pendiente',
+        'status_class' => 'status-pending',
         'url' => '/blind-sqli.php',
     ],
     [
         'number' => '06',
-        'icon' => 'UP',
+        'icon' => 'upload',
         'title' => 'Carga de archivos',
         'description' => 'Carga de evidencias con validaciones deliberadamente incompletas.',
+        'risk' => 'Crítico',
+        'risk_class' => 'risk-critical',
+        'status' => 'Pendiente',
+        'status_class' => 'status-pending',
         'url' => '/upload.php',
     ],
     [
         'number' => '07',
-        'icon' => 'XR',
+        'icon' => 'code',
         'title' => 'XSS Reflected',
         'description' => 'Entrada recibida y reflejada directamente en la respuesta web.',
+        'risk' => 'Medio',
+        'risk_class' => 'risk-medium',
+        'status' => 'Pendiente',
+        'status_class' => 'status-pending',
         'url' => '/xss-reflected.php',
     ],
     [
         'number' => '08',
-        'icon' => 'XS',
+        'icon' => 'database',
         'title' => 'XSS Stored',
         'description' => 'Contenido almacenado y mostrado posteriormente a otros usuarios.',
+        'risk' => 'Alto',
+        'risk_class' => 'risk-high',
+        'status' => 'Pendiente',
+        'status_class' => 'status-pending',
         'url' => '/xss-stored.php',
     ],
     [
         'number' => '09',
-        'icon' => 'XD',
+        'icon' => 'code',
         'title' => 'XSS DOM',
         'description' => 'Manipulación insegura del contenido procesado por el navegador.',
+        'risk' => 'Medio',
+        'risk_class' => 'risk-medium',
+        'status' => 'Pendiente',
+        'status_class' => 'status-pending',
         'url' => '/xss-dom.php',
     ],
     [
         'number' => '10',
-        'icon' => 'HC',
+        'icon' => 'cookie',
         'title' => 'Cabeceras y cookies',
         'description' => 'Inspección de la sesión, cookies y cabeceras HTTP de la aplicación.',
+        'risk' => 'Informativo',
+        'risk_class' => 'risk-info',
+        'status' => 'Pendiente',
+        'status_class' => 'status-pending',
         'url' => '/security-info.php',
     ],
 ];
+
+$statusTotals = [
+    'Pendiente' => 0,
+    'En desarrollo' => 0,
+    'Implementado' => 0,
+    'Probado' => 0,
+];
+
+$statusWeights = [
+    'Pendiente' => 0,
+    'En desarrollo' => 25,
+    'Implementado' => 70,
+    'Probado' => 100,
+];
+
+$totalProgress = 0;
+
+foreach ($modules as $module) {
+    $statusTotals[$module['status']]++;
+    $totalProgress += $statusWeights[$module['status']];
+}
+
+$progress = (int) round($totalProgress / count($modules));
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Panel principal — Service Desk FIIS</title>
+
+    <script>
+        (() => {
+            const savedTheme = localStorage.getItem("securityLabTheme");
+
+            if (savedTheme) {
+                document.documentElement.dataset.theme = savedTheme;
+            }
+        })();
+    </script>
 
     <link rel="stylesheet" href="/styles.css">
 </head>
 
-<body>
+<body data-page="dashboard">
 <div class="app-shell">
     <aside class="sidebar">
         <div class="sidebar-brand">
@@ -117,36 +197,54 @@ $modules = [
 
         <nav class="sidebar-nav">
             <a class="sidebar-link active" href="/dashboard.php">
-                <span class="sidebar-link-icon">⌂</span>
+                <span class="sidebar-link-icon">
+                    <?= icon('home', 18) ?>
+                </span>
+
                 Panel principal
             </a>
 
             <a class="sidebar-link" href="#modules">
-                <span class="sidebar-link-icon">▦</span>
+                <span class="sidebar-link-icon">
+                    <?= icon('shield', 18) ?>
+                </span>
+
                 Módulos de prueba
             </a>
 
             <a class="sidebar-link" href="/security-info.php">
-                <span class="sidebar-link-icon">◎</span>
-                Información HTTP
+                <span class="sidebar-link-icon">
+                    <?= icon('cookie', 18) ?>
+                </span>
+
+                Cabeceras y cookies
             </a>
         </nav>
 
-        <div class="sidebar-section-title">Laboratorio</div>
+        <div class="sidebar-section-title">Acceso rápido</div>
 
         <nav class="sidebar-nav">
             <a class="sidebar-link" href="/sqli.php">
-                <span class="sidebar-link-icon">DB</span>
+                <span class="sidebar-link-icon">
+                    <?= icon('database', 18) ?>
+                </span>
+
                 Base de datos
             </a>
 
             <a class="sidebar-link" href="/upload.php">
-                <span class="sidebar-link-icon">UP</span>
+                <span class="sidebar-link-icon">
+                    <?= icon('upload', 18) ?>
+                </span>
+
                 Archivos
             </a>
 
             <a class="sidebar-link" href="/xss-reflected.php">
-                <span class="sidebar-link-icon">JS</span>
+                <span class="sidebar-link-icon">
+                    <?= icon('code', 18) ?>
+                </span>
+
                 Navegador
             </a>
         </nav>
@@ -159,11 +257,15 @@ $modules = [
 
                 <div>
                     <strong>
-                        <?= htmlspecialchars((string) $user['full_name']) ?>
+                        <?= htmlspecialchars(
+                            (string) $user['full_name']
+                        ) ?>
                     </strong>
 
                     <span>
-                        <?= htmlspecialchars((string) $user['role']) ?>
+                        <?= htmlspecialchars(
+                            (string) $user['role']
+                        ) ?>
                     </span>
                 </div>
             </div>
@@ -176,12 +278,23 @@ $modules = [
 
     <section class="main-area">
         <header class="top-header">
-            <div class="page-title">
-                <h1>Panel de control</h1>
+            <div class="top-header-left">
+                <button
+                    type="button"
+                    class="icon-button mobile-menu-button"
+                    data-sidebar-toggle
+                    aria-label="Abrir menú"
+                >
+                    <?= icon('menu', 20) ?>
+                </button>
 
-                <p>
-                    Administración del laboratorio académico de seguridad
-                </p>
+                <div class="page-title">
+                    <h1>Panel de control</h1>
+
+                    <p>
+                        Administración del laboratorio académico
+                    </p>
+                </div>
             </div>
 
             <div class="header-actions">
@@ -189,6 +302,21 @@ $modules = [
                     <span class="environment-dot"></span>
                     V1 vulnerable · localhost
                 </div>
+
+                <button
+                    type="button"
+                    class="icon-button"
+                    data-theme-toggle
+                    aria-label="Cambiar tema"
+                >
+                    <span data-theme-moon>
+                        <?= icon('moon', 19) ?>
+                    </span>
+
+                    <span data-theme-sun hidden>
+                        <?= icon('sun', 19) ?>
+                    </span>
+                </button>
             </div>
         </header>
 
@@ -197,17 +325,20 @@ $modules = [
                 <div>
                     <h2>
                         Bienvenido,
-                        <?= htmlspecialchars((string) $user['full_name']) ?>
+                        <?= htmlspecialchars(
+                            (string) $user['full_name']
+                        ) ?>
                     </h2>
 
                     <p>
-                        El entorno está preparado para desarrollar y documentar
-                        pruebas controladas sobre PHP 8.2, Apache y PostgreSQL 16.
+                        El entorno está preparado para desarrollar,
+                        comprobar y documentar los escenarios de seguridad
+                        de la aplicación vulnerable.
                     </p>
                 </div>
 
                 <div class="banner-badge">
-                    Sesión iniciada:
+                    Sesión:
                     <?= htmlspecialchars(
                         (string) ($_SESSION['login_time'] ?? 'No disponible')
                     ) ?>
@@ -216,44 +347,108 @@ $modules = [
 
             <section class="stats-grid">
                 <article class="stat-card">
-                    <div class="stat-icon">10</div>
+                    <div class="stat-icon">
+                        <?= icon('shield', 21) ?>
+                    </div>
 
                     <div class="stat-content">
-                        <strong>10</strong>
+                        <strong><?= count($modules) ?></strong>
                         <span>Módulos planificados</span>
                     </div>
                 </article>
 
                 <article class="stat-card">
-                    <div class="stat-icon">PHP</div>
-
-                    <div class="stat-content">
-                        <strong><?= htmlspecialchars(PHP_VERSION) ?></strong>
-                        <span>Versión de PHP</span>
+                    <div class="stat-icon">
+                        <?= icon('activity', 21) ?>
                     </div>
-                </article>
-
-                <article class="stat-card">
-                    <div class="stat-icon">DB</div>
-
-                    <div class="stat-content">
-                        <strong>16</strong>
-                        <span>PostgreSQL</span>
-                    </div>
-                </article>
-
-                <article class="stat-card">
-                    <div class="stat-icon">ID</div>
 
                     <div class="stat-content">
                         <strong>
-                            <?= htmlspecialchars(
-                                substr(session_id(), 0, 8)
-                            ) ?>
+                            <?= $statusTotals['En desarrollo'] ?>
                         </strong>
-                        <span>Identificador de sesión</span>
+
+                        <span>En desarrollo</span>
                     </div>
                 </article>
+
+                <article class="stat-card">
+                    <div class="stat-icon">
+                        <?= icon('check', 21) ?>
+                    </div>
+
+                    <div class="stat-content">
+                        <strong>
+                            <?= $statusTotals['Implementado'] ?>
+                        </strong>
+
+                        <span>Implementados</span>
+                    </div>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-icon">
+                        <?= icon('clock', 21) ?>
+                    </div>
+
+                    <div class="stat-content">
+                        <strong>
+                            <?= $statusTotals['Pendiente'] ?>
+                        </strong>
+
+                        <span>Pendientes</span>
+                    </div>
+                </article>
+            </section>
+
+            <section class="progress-card">
+                <div class="progress-header">
+                    <div>
+                        <h3>Progreso general del proyecto</h3>
+
+                        <p>
+                            Calculado según el estado actual de cada módulo.
+                        </p>
+                    </div>
+
+                    <div class="progress-percentage">
+                        <?= $progress ?>%
+                    </div>
+                </div>
+
+                <div
+                    class="progress-track"
+                    role="progressbar"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="<?= $progress ?>"
+                >
+                    <div
+                        class="progress-value"
+                        style="width: <?= $progress ?>%;"
+                    ></div>
+                </div>
+
+                <div class="progress-legend">
+                    <span>
+                        <i class="legend-dot dot-pending"></i>
+                        <?= $statusTotals['Pendiente'] ?> pendientes
+                    </span>
+
+                    <span>
+                        <i class="legend-dot dot-development"></i>
+                        <?= $statusTotals['En desarrollo'] ?> en desarrollo
+                    </span>
+
+                    <span>
+                        <i class="legend-dot dot-implemented"></i>
+                        <?= $statusTotals['Implementado'] ?> implementados
+                    </span>
+
+                    <span>
+                        <i class="legend-dot dot-tested"></i>
+                        <?= $statusTotals['Probado'] ?> probados
+                    </span>
+                </div>
             </section>
 
             <section id="modules">
@@ -262,7 +457,8 @@ $modules = [
                         <h2>Módulos del laboratorio</h2>
 
                         <p>
-                            Selecciona el escenario que deseas implementar o revisar.
+                            Selecciona un escenario para iniciar su
+                            implementación o revisión.
                         </p>
                     </div>
                 </div>
@@ -272,16 +468,34 @@ $modules = [
                         <article class="module-card">
                             <div class="module-card-top">
                                 <div class="module-icon">
-                                    <?= htmlspecialchars($module['icon']) ?>
+                                    <?= icon($module['icon'], 22) ?>
                                 </div>
 
                                 <div class="module-number">
-                                    <?= htmlspecialchars($module['number']) ?>
+                                    <?= htmlspecialchars(
+                                        $module['number']
+                                    ) ?>
                                 </div>
                             </div>
 
-                            <div class="module-tag">
-                                Riesgo de seguridad
+                            <div class="module-badges">
+                                <span
+                                    class="risk-badge <?= htmlspecialchars(
+                                        $module['risk_class']
+                                    ) ?>"
+                                >
+                                    <?= htmlspecialchars($module['risk']) ?>
+                                </span>
+
+                                <span
+                                    class="status-badge <?= htmlspecialchars(
+                                        $module['status_class']
+                                    ) ?>"
+                                >
+                                    <?= htmlspecialchars(
+                                        $module['status']
+                                    ) ?>
+                                </span>
                             </div>
 
                             <h3>
@@ -289,12 +503,16 @@ $modules = [
                             </h3>
 
                             <p>
-                                <?= htmlspecialchars($module['description']) ?>
+                                <?= htmlspecialchars(
+                                    $module['description']
+                                ) ?>
                             </p>
 
                             <a
                                 class="module-button"
-                                href="<?= htmlspecialchars($module['url']) ?>"
+                                href="<?= htmlspecialchars(
+                                    $module['url']
+                                ) ?>"
                             >
                                 Abrir escenario
                                 <span>→</span>
@@ -311,5 +529,7 @@ $modules = [
         </footer>
     </section>
 </div>
+
+<script src="/assets/app.js"></script>
 </body>
 </html>

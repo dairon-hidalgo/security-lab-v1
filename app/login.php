@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="/styles.css">
 </head>
 
-<body>
+<body class="login-body">
 <div class="login-layout">
     <section class="login-hero">
         <div class="brand">
@@ -295,5 +295,6 @@ passwordToggle.addEventListener('click', () => {
     passwordToggle.textContent = hidden ? 'Ocultar' : 'Ver';
 });
 </script>
+<script src="/assets/app.js"></script>
 </body>
 </html>
