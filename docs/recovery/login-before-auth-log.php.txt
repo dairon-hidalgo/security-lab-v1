@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/session.php';
-require_once __DIR__ . '/auth-log.php';
 
 if (is_authenticated()) {
     header('Location: /dashboard.php');
@@ -43,15 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $user = $statement->fetch();
 
-        $wasSuccessful = $user !== false;
-
-        register_login_attempt(
-            $pdo,
-            $username,
-            $wasSuccessful
-        );
-
-        if ($wasSuccessful) {
+        if ($user !== false) {
             $_SESSION['user'] = [
                 'id' => (int) $user['id'],
                 'username' => $user['username'],

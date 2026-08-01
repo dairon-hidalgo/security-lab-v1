@@ -7,8 +7,8 @@ function register_login_attempt(
     string $username,
     bool $wasSuccessful
 ): void {
-    $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+    $ipAddress = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    $userAgent = (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown');
 
     $statement = $pdo->prepare(
         'INSERT INTO login_attempts (
@@ -24,10 +24,29 @@ function register_login_attempt(
         )'
     );
 
-    $statement->execute([
-        'username' => $username !== '' ? $username : '(vacío)',
-        'ip_address' => $ipAddress,
-        'user_agent' => $userAgent,
-        'was_successful' => $wasSuccessful,
-    ]);
+    $statement->bindValue(
+        ':username',
+        $username !== '' ? $username : '(vacío)',
+        PDO::PARAM_STR
+    );
+
+    $statement->bindValue(
+        ':ip_address',
+        $ipAddress,
+        PDO::PARAM_STR
+    );
+
+    $statement->bindValue(
+        ':user_agent',
+        $userAgent,
+        PDO::PARAM_STR
+    );
+
+    $statement->bindValue(
+        ':was_successful',
+        $wasSuccessful,
+        PDO::PARAM_BOOL
+    );
+
+    $statement->execute();
 }
