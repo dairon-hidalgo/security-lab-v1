@@ -15,7 +15,7 @@ return [
         'number' => '02',
         'title' => 'Ejecución de comandos',
         'risk' => 'Crítico',
-        'status' => 'Pendiente',
+        'status' => 'Implementado',
         'owasp' => 'A03:2021 — Injection',
         'url' => '/command.php',
     ],
