@@ -127,8 +127,8 @@ $modules = [
         'description' => 'Manipulación insegura del contenido procesado por el navegador.',
         'risk' => 'Medio',
         'risk_class' => 'risk-medium',
-        'status' => 'Pendiente',
-        'status_class' => 'status-pending',
+        'status' => 'Implementado',
+        'status_class' => 'status-implemented',
         'url' => '/xss-dom.php',
     ],
 ];

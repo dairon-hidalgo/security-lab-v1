@@ -79,7 +79,7 @@ return [
         'number' => '10',
         'title' => 'XSS DOM',
         'risk' => 'Medio',
-        'status' => 'Pendiente',
+        'status' => 'Implementado',
         'owasp' => 'A03:2021 — Injection',
         'url' => '/xss-dom.php',
     ],
