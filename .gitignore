@@ -5,3 +5,18 @@
 
 app/uploads/*
 !app/uploads/.gitkeep
+
+# Respaldos y paquetes generados
+backup-*/
+app-backup-*/
+backup-modulo*/
+backup-estabilizacion-*/
+backup-codificacion-*/
+app/dashboard-backup-*.php
+app/dashboard-codificacion-*.php
+*.zip
+*.tar.gz
+
+# Evidencias temporales
+pentest/evidence/*
+!pentest/evidence/.gitkeep

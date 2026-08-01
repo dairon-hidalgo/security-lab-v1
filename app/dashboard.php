@@ -143,7 +143,7 @@ $statusTotals = [
 $statusWeights = [
     'Pendiente' => 0,
     'En desarrollo' => 25,
-    'Implementado' => 70,
+    'Implementado' => 100,
     'Probado' => 100,
 ];
 
@@ -403,7 +403,7 @@ $progress = (int) round($totalProgress / count($modules));
             <section class="progress-card">
                 <div class="progress-header">
                     <div>
-                        <h3>Progreso general del proyecto</h3>
+                        <h3>Progreso de implementación</h3>
 
                         <p>
                             Calculado según el estado actual de cada módulo.
@@ -533,3 +533,4 @@ $progress = (int) round($totalProgress / count($modules));
 <script src="/assets/app.js"></script>
 </body>
 </html>
+
