@@ -27,17 +27,35 @@ $activeUrl = '/blind-sqli.php';
 $activeIcon = 'eye';
 $activeLabel = 'Blind SQL Injection';
 
-$id = (string) ($_GET['id'] ?? '1');
+$id = trim((string) ($_GET['id'] ?? '1'));
 $consulted = array_key_exists('id', $_GET);
 $exists = false;
+$inputRejected = false;
 
 if ($consulted) {
-    try {
-        $pdo = db();
-        $sql = "SELECT id FROM users WHERE id = $id LIMIT 1";
-        $exists = $pdo->query($sql)->fetchColumn() !== false;
-    } catch (Throwable $exception) {
-        $exists = false;
+    $validatedId = filter_var(
+        $id,
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1]]
+    );
+
+    if ($validatedId === false) {
+        http_response_code(400);
+        $inputRejected = true;
+    } else {
+        try {
+            $pdo = db();
+            $statement = $pdo->prepare(
+                'SELECT 1 FROM users WHERE id = :id LIMIT 1'
+            );
+            $statement->bindValue(':id', $validatedId, PDO::PARAM_INT);
+            $statement->execute();
+            $exists = $statement->fetchColumn() !== false;
+        } catch (Throwable $exception) {
+            error_log($exception->getMessage());
+            http_response_code(500);
+            $exists = false;
+        }
     }
 }
 ?>
@@ -64,7 +82,7 @@ if ($consulted) {
             <div class="sidebar-logo">FI</div>
             <div>
                 <strong>Service Desk FIIS</strong>
-                <span>Security Lab · V1</span>
+                <span>Security Lab · V2</span>
             </div>
         </div>
 
@@ -111,7 +129,7 @@ if ($consulted) {
                 </div>
             </div>
             <div class="header-actions">
-                <div class="environment-badge"><span class="environment-dot"></span>Riesgo crítico</div>
+                <div class="environment-badge"><span class="environment-dot"></span>Control activo</div>
                 <button type="button" class="icon-button" data-theme-toggle aria-label="Cambiar tema">
                     <span data-theme-moon><?= icon('moon', 19) ?></span>
                     <span data-theme-sun hidden><?= icon('sun', 19) ?></span>
@@ -123,9 +141,9 @@ if ($consulted) {
             <section class="module-hero">
                 <div class="module-hero-number">MÓDULO 06 · OWASP A03</div>
                 <h1>Consulta booleana de usuarios</h1>
-                <p>La interfaz no muestra registros ni mensajes del motor, únicamente el resultado lógico de la condición.</p>
+                <p>La interfaz conserva una respuesta booleana, pero el ID se valida y se consulta mediante un parametro preparado.</p>
             </section>
-            <div class="warning-box"><strong>Vulnerabilidad intencional:</strong> la condición recibida se concatena directamente dentro de la sentencia SQL.</div>
+            <div class="alert alert-success"><strong>Mitigacion activa:</strong> solo se aceptan enteros positivos y la consulta usa un parametro preparado.</div>
             <section class="module-layout">
                 <article class="panel-card">
 
@@ -152,10 +170,10 @@ if ($consulted) {
 
                     <h3>Comportamiento</h3>
                     <div class="status-list">
-                        <div class="status-item"><span class="status-circle">1</span>Entrada por parámetro GET</div>
-                        <div class="status-item"><span class="status-circle">2</span>Respuesta booleana</div>
-                        <div class="status-item"><span class="status-circle">3</span>Errores ocultos</div>
-                        <div class="status-item"><span class="status-circle">4</span>Sin datos visibles</div>
+                        <div class="status-item"><span class="status-circle">1</span>Entrada por parametro GET</div>
+                        <div class="status-item"><span class="status-circle">2</span>Validacion numerica estricta</div>
+                        <div class="status-item"><span class="status-circle">3</span>Consulta preparada con PDO</div>
+                        <div class="status-item"><span class="status-circle">4</span>Errores genericos y registrados</div>
                     </div>
                     <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
                     <table class="info-table">

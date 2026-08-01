@@ -27,17 +27,32 @@ $activeUrl = '/sqli.php';
 $activeIcon = 'database';
 $activeLabel = 'SQL Injection manual';
 
-$id = (string) ($_GET['id'] ?? '1');
+$id = trim((string) ($_GET['id'] ?? '1'));
+$validatedId = filter_var(
+    $id,
+    FILTER_VALIDATE_INT,
+    ['options' => ['min_range' => 1]]
+);
+
 $results = [];
-$sqlExecuted = '';
+$sqlExecuted = 'SELECT id, username, full_name, role FROM users WHERE id = :id ORDER BY id';
 $errorMessage = null;
 
-try {
-    $pdo = db();
-    $sqlExecuted = "SELECT id, username, full_name, role FROM users WHERE id = $id ORDER BY id";
-    $results = $pdo->query($sqlExecuted)->fetchAll();
-} catch (Throwable $exception) {
-    $errorMessage = $exception->getMessage();
+if ($validatedId === false) {
+    http_response_code(400);
+    $errorMessage = 'El identificador debe ser un numero entero positivo.';
+} else {
+    try {
+        $pdo = db();
+        $statement = $pdo->prepare($sqlExecuted);
+        $statement->bindValue(':id', $validatedId, PDO::PARAM_INT);
+        $statement->execute();
+        $results = $statement->fetchAll();
+    } catch (Throwable $exception) {
+        error_log($exception->getMessage());
+        http_response_code(500);
+        $errorMessage = 'No fue posible completar la consulta.';
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -63,7 +78,7 @@ try {
             <div class="sidebar-logo">FI</div>
             <div>
                 <strong>Service Desk FIIS</strong>
-                <span>Security Lab · V1</span>
+                <span>Security Lab · V2</span>
             </div>
         </div>
 
@@ -106,11 +121,11 @@ try {
                 </button>
                 <div class="page-title">
                     <h1>SQL Injection manual</h1>
-                    <p>Consulta vulnerable de usuarios mediante un parámetro controlado</p>
+                    <p>Consulta protegida mediante validacion y parametros preparados</p>
                 </div>
             </div>
             <div class="header-actions">
-                <div class="environment-badge"><span class="environment-dot"></span>Riesgo crítico</div>
+                <div class="environment-badge"><span class="environment-dot"></span>Control activo</div>
                 <button type="button" class="icon-button" data-theme-toggle aria-label="Cambiar tema">
                     <span data-theme-moon><?= icon('moon', 19) ?></span>
                     <span data-theme-sun hidden><?= icon('sun', 19) ?></span>
@@ -122,14 +137,14 @@ try {
             <section class="module-hero">
                 <div class="module-hero-number">MÓDULO 04 · OWASP A03</div>
                 <h1>Consulta directa de usuarios</h1>
-                <p>El identificador proporcionado se concatena dentro de una consulta SQL sin parametrización.</p>
+                <p>El identificador se valida como entero y se envia mediante un parametro preparado.</p>
             </section>
-            <div class="warning-box"><strong>Vulnerabilidad intencional:</strong> la aplicación no valida ni parametriza el identificador antes de enviarlo a PostgreSQL.</div>
+            <div class="alert alert-success"><strong>Mitigacion activa:</strong> validacion numerica, consulta preparada y mensajes de error genericos.</div>
             <section class="module-layout">
                 <article class="panel-card">
 
                     <div class="section-heading">
-                        <div><h2>Consulta manual por ID</h2><p>El valor se inserta directamente en la sentencia SQL.</p></div>
+                        <div><h2>Consulta manual por ID</h2><p>El valor se enlaza al parametro :id y nunca se concatena en la sentencia.</p></div>
                     </div>
 
                     <form method="get" action="/sqli.php">
@@ -142,7 +157,7 @@ try {
 
                     <?php if ($sqlExecuted !== ''): ?>
                         <div style="margin-top: 24px;">
-                            <h3>Consulta construida</h3>
+                            <h3>Consulta parametrizada</h3>
                             <pre class="terminal-output"><code><?= htmlspecialchars($sqlExecuted, ENT_QUOTES, 'UTF-8') ?></code></pre>
                         </div>
                     <?php endif; ?>
@@ -176,12 +191,12 @@ try {
                 </article>
                 <aside class="module-status-card">
 
-                    <h3>Flujo vulnerable</h3>
+                    <h3>Controles aplicados</h3>
                     <div class="status-list">
-                        <div class="status-item"><span class="status-circle">1</span>Parámetro recibido por GET</div>
-                        <div class="status-item"><span class="status-circle">2</span>Concatenación directa</div>
-                        <div class="status-item"><span class="status-circle">3</span>Consulta enviada a PostgreSQL</div>
-                        <div class="status-item"><span class="status-circle">4</span>Resultados visibles</div>
+                        <div class="status-item"><span class="status-circle">1</span>Parametro recibido por GET</div>
+                        <div class="status-item"><span class="status-circle">2</span>Validacion de entero positivo</div>
+                        <div class="status-item"><span class="status-circle">3</span>Consulta preparada con PDO</div>
+                        <div class="status-item"><span class="status-circle">4</span>Salida codificada en HTML</div>
                     </div>
                     <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
                     <h3>Punto de prueba</h3>
