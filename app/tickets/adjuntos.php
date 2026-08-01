@@ -159,25 +159,14 @@ require __DIR__ . '/../includes/header.php';
 </div>
 
 <section class="module-hero">
-    <div class="module-hero-number">MESA DE SERVICIO</div>
-
     <h1>Carga de adjuntos</h1>
-
-    <p>
-        Los archivos adjuntos a un ticket se almacenan conservando su
-        nombre y extensión originales.
-    </p>
 </section>
 
 <section class="module-layout">
     <article class="panel-card">
         <div class="section-heading">
             <div>
-                <h2>Subir evidencia</h2>
-
-                <p>
-                    El archivo conservará su nombre y extensión originales.
-                </p>
+                <h2>Subir archivo</h2>
             </div>
         </div>
 
@@ -229,7 +218,7 @@ require __DIR__ . '/../includes/header.php';
         <?php endif; ?>
 
         <div style="margin-top: 26px;">
-            <h3>Archivos disponibles por URL</h3>
+            <h3>Archivos disponibles</h3>
 
             <div class="project-module-table-wrapper">
                 <table class="info-table">
@@ -279,48 +268,6 @@ require __DIR__ . '/../includes/header.php';
             </div>
         </div>
     </article>
-
-    <aside class="module-status-card">
-        <h3>Flujo de carga</h3>
-
-        <div class="status-list">
-            <div class="status-item">
-                <span class="status-circle">1</span>
-                Archivo recibido por POST
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">2</span>
-                Extensión sin validar
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">3</span>
-                Nombre original conservado
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">4</span>
-                Archivo servido desde webroot
-            </div>
-        </div>
-
-        <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
-
-        <h3>Punto de carga</h3>
-
-        <table class="info-table">
-            <tr>
-                <th>Campo</th>
-                <td><code>evidence</code></td>
-            </tr>
-
-            <tr>
-                <th>Destino</th>
-                <td><code>/uploads/</code></td>
-            </tr>
-        </table>
-    </aside>
 </section>
 
 <section class="panel-card" style="margin-top: 22px;">

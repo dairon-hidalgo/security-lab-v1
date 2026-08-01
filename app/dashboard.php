@@ -71,21 +71,10 @@ require __DIR__ . '/includes/header.php';
             a las áreas del sistema.
         </p>
     </div>
-
-    <div class="banner-badge">
-        Sesión:
-        <?= htmlspecialchars(
-            (string) ($_SESSION['login_time'] ?? 'No disponible')
-        ) ?>
-    </div>
 </section>
 
 <section class="stats-grid">
     <article class="stat-card">
-        <div class="stat-icon">
-            <?= icon('activity', 21) ?>
-        </div>
-
         <div class="stat-content">
             <strong><?= $ticketTotals['abierto'] ?></strong>
             <span>Tickets abiertos</span>
@@ -93,9 +82,6 @@ require __DIR__ . '/includes/header.php';
     </article>
 
     <article class="stat-card">
-        <div class="stat-icon">
-            <?= icon('clock', 21) ?>
-        </div>
 
         <div class="stat-content">
             <strong><?= $ticketTotals['en proceso'] ?></strong>
@@ -104,9 +90,7 @@ require __DIR__ . '/includes/header.php';
     </article>
 
     <article class="stat-card">
-        <div class="stat-icon">
-            <?= icon('database', 21) ?>
-        </div>
+
 
         <div class="stat-content">
             <strong><?= $userCount ?></strong>
@@ -115,9 +99,6 @@ require __DIR__ . '/includes/header.php';
     </article>
 
     <article class="stat-card">
-        <div class="stat-icon">
-            <?= icon('lock', 21) ?>
-        </div>
 
         <div class="stat-content">
             <strong><?= $accessAttempts ?></strong>

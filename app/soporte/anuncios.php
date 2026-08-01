@@ -10,9 +10,7 @@ $user = current_user();
 $pdo = db();
 
 /*
- * Cookie ficticia del sistema.
- * Se deja accesible desde JavaScript de forma intencional para demostrar
- * el impacto de una vulnerabilidad XSS DOM sin utilizar datos reales.
+ * Preferencias del usuario almacenadas en el navegador.
  */
 if (!isset($_COOKIE['LAB_XSS_DEMO'])) {
     $demoCookieValue = sprintf(
@@ -33,7 +31,6 @@ if (!isset($_COOKIE['LAB_XSS_DEMO'])) {
 }
 
 $databaseError = null;
-$recentCaptures = [];
 
 try {
     $pdo->exec(
@@ -49,33 +46,8 @@ try {
             captured_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )'
     );
-
-    $recentCaptures = $pdo->query(
-        'SELECT
-            xss_dom_captures.id,
-            xss_dom_captures.cookie_name,
-            xss_dom_captures.cookie_value,
-            xss_dom_captures.source_hash,
-            xss_dom_captures.page_url,
-            xss_dom_captures.ip_address,
-            xss_dom_captures.captured_at,
-            users.username
-         FROM xss_dom_captures
-         LEFT JOIN users ON users.id = xss_dom_captures.user_id
-         ORDER BY xss_dom_captures.captured_at DESC
-         LIMIT 15'
-    )->fetchAll();
 } catch (Throwable $exception) {
     $databaseError = $exception->getMessage();
-}
-
-function short_dom_value(string $value, int $limit = 78): string
-{
-    if (strlen($value) <= $limit) {
-        return $value;
-    }
-
-    return substr($value, 0, $limit - 3) . '...';
 }
 
 $pageTitle = 'Anuncios';
@@ -139,25 +111,6 @@ require __DIR__ . '/../includes/header.php';
         overflow-wrap: anywhere;
     }
 
-    .dom-proof {
-        padding: 15px;
-        margin-top: 15px;
-        border-left: 4px solid var(--accent-600);
-        border-radius: 10px;
-        background: rgba(37, 99, 235, 0.08);
-    }
-
-    .dom-cookie-box {
-        padding: 14px;
-        margin-top: 12px;
-        border-radius: 10px;
-        background: #07111f;
-        color: #b9f6ca;
-        font-family: Consolas, "Courier New", monospace;
-        font-size: 12px;
-        overflow-wrap: anywhere;
-    }
-
     .dom-capture-status {
         margin-top: 12px;
         color: var(--text-soft);
@@ -180,12 +133,11 @@ require __DIR__ . '/../includes/header.php';
 <section class="module-hero">
     <div class="module-hero-number">ATENCIÓN AL USUARIO</div>
 
-    <h1>Visor de anuncios basado en el fragmento URL</h1>
+    <h1>Visor de anuncios</h1>
 
     <p>
-        El navegador lee el contenido situado después del símbolo
-        <code>#</code> y lo inserta directamente mediante
-        <code>innerHTML</code>. El servidor no procesa ese valor.
+        Escribe el contenido del anuncio y obtén una vista previa antes de
+        publicarlo en el servicio.
     </p>
 </section>
 
@@ -193,10 +145,10 @@ require __DIR__ . '/../includes/header.php';
     <article class="panel-card">
         <div class="section-heading">
             <div>
-                <h2>Contenido del fragmento</h2>
+                <h2>Vista previa del anuncio</h2>
 
                 <p>
-                    El valor se procesa únicamente en el navegador.
+                    El contenido se procesa en el navegador.
                 </p>
             </div>
         </div>
@@ -204,7 +156,7 @@ require __DIR__ . '/../includes/header.php';
         <div class="dom-source-row">
             <div class="form-group" style="margin-bottom: 0;">
                 <label for="dom-source">
-                    Texto, HTML o demostración controlada
+                    Contenido del anuncio
                 </label>
 
                 <input
@@ -212,7 +164,7 @@ require __DIR__ . '/../includes/header.php';
                     type="text"
                     id="dom-source"
                     autocomplete="off"
-                    placeholder="Ejemplo: Hola desde el fragmento"
+                    placeholder="Ejemplo: Recordatorio de mantenimiento programado"
                 >
             </div>
 
@@ -221,21 +173,13 @@ require __DIR__ . '/../includes/header.php';
                 class="primary-button"
                 id="render-dom-source"
             >
-                Procesar contenido
+                Vista previa
                 <span>→</span>
             </button>
         </div>
 
-        <div class="dom-proof" id="dom-proof">
-            Aún no se ha ejecutado una demostración.
-        </div>
-
         <div class="dom-sink" id="dom-sink">
-            El contenido procesado aparecerá aquí.
-        </div>
-
-        <div class="dom-cookie-box" id="dom-cookie-view">
-            document.cookie: cargando…
+            La vista previa aparecerá aquí.
         </div>
 
         <div
@@ -254,8 +198,8 @@ require __DIR__ . '/../includes/header.php';
                 class="dom-example-button"
                 id="dom-example-text"
             >
-                <strong>Texto normal</strong>
-                <code>Hola desde Service Desk FIIS</code>
+                <strong>Texto simple</strong>
+                <code>Recordatorio de mantenimiento este fin de semana</code>
             </button>
 
             <button
@@ -263,125 +207,38 @@ require __DIR__ . '/../includes/header.php';
                 class="dom-example-button"
                 id="dom-example-html"
             >
-                <strong>HTML interpretado</strong>
-                <code>&lt;strong&gt;Contenido HTML&lt;/strong&gt;</code>
-            </button>
-
-            <button
-                type="button"
-                class="dom-example-button"
-                id="dom-example-xss"
-            >
-                <strong>Captura local de cookie ficticia</strong>
-                <code>&lt;img onerror="captureDemoCookie()"&gt;</code>
+                <strong>Encabezado y párrafo</strong>
+                <code>&lt;h3&gt;Aviso&lt;/h3&gt;&lt;p&gt;Detalle del aviso&lt;/p&gt;</code>
             </button>
         </div>
 
         <div class="status-list" style="margin-top: 18px;">
             <div class="status-item">
                 <span class="status-circle">1</span>
-                Fuente: <code>location.hash</code>
+                Escribir el contenido
             </div>
 
             <div class="status-item">
                 <span class="status-circle">2</span>
-                Sink: <code>innerHTML</code>
+                Vista previa en el navegador
             </div>
 
             <div class="status-item">
                 <span class="status-circle">3</span>
-                Destino: punto de captura local
+                Publicación para el servicio
             </div>
         </div>
     </aside>
-</section>
-
-<section class="panel-card" style="margin-top: 21px;">
-    <div class="section-heading">
-        <div>
-            <h2>Capturas locales recientes</h2>
-
-            <p>
-                Solamente se admite la cookie ficticia
-                <code>LAB_XSS_DEMO</code>.
-            </p>
-        </div>
-    </div>
-
-    <?php if ($databaseError !== null): ?>
-        <div class="alert alert-error">
-            <?= htmlspecialchars($databaseError) ?>
-        </div>
-    <?php elseif ($recentCaptures === []): ?>
-        <div class="alert alert-info">
-            Todavía no se registraron capturas.
-        </div>
-    <?php else: ?>
-        <div style="overflow-x: auto;">
-            <table class="info-table">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Cookie ficticia</th>
-                    <th>Fragmento</th>
-                    <th>Fecha</th>
-                </tr>
-                </thead>
-
-                <tbody>
-                <?php foreach ($recentCaptures as $capture): ?>
-                    <tr>
-                        <td>
-                            <?= htmlspecialchars((string) $capture['id']) ?>
-                        </td>
-
-                        <td>
-                            <?= htmlspecialchars(
-                                (string) ($capture['username'] ?? 'desconocido')
-                            ) ?>
-                        </td>
-
-                        <td>
-                            <code>
-                                <?= htmlspecialchars(
-                                    (string) $capture['cookie_name']
-                                    . '='
-                                    . (string) $capture['cookie_value']
-                                ) ?>
-                            </code>
-                        </td>
-
-                        <td title="<?= htmlspecialchars((string) ($capture['source_hash'] ?? '')) ?>">
-                            <?= htmlspecialchars(
-                                short_dom_value(
-                                    (string) ($capture['source_hash'] ?? '')
-                                )
-                            ) ?>
-                        </td>
-
-                        <td>
-                            <?= htmlspecialchars((string) $capture['captured_at']) ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    <?php endif; ?>
 </section>
 
 <script>
     (() => {
         const sourceInput = document.getElementById('dom-source');
         const sink = document.getElementById('dom-sink');
-        const proof = document.getElementById('dom-proof');
-        const cookieView = document.getElementById('dom-cookie-view');
         const captureStatus = document.getElementById('dom-capture-status');
 
-        const normalExample = 'Hola desde Service Desk FIIS';
-        const htmlExample = '<strong>HTML interpretado por innerHTML</strong>';
-        const xssExample = '<img src=x onerror="captureDemoCookie();document.getElementById(\'dom-proof\').textContent=\'XSS DOM ejecutado y cookie ficticia enviada al punto de captura local\';this.remove()">';
+        const textExample = 'Recordatorio de mantenimiento este fin de semana';
+        const htmlExample = '<h3>Aviso</h3><p>Detalle del aviso para todos los usuarios.</p>';
 
         function decodeFragment() {
             const raw = window.location.hash.slice(1);
@@ -403,13 +260,10 @@ require __DIR__ . '/../includes/header.php';
             sourceInput.value = source;
 
             if (source === '') {
-                sink.textContent = 'El contenido procesado aparecerá aquí.';
+                sink.textContent = 'La vista previa aparecerá aquí.';
                 return;
             }
 
-            /*
-             * La fuente location.hash se inserta sin sanitización.
-             */
             sink.innerHTML = source;
         }
 
@@ -431,11 +285,11 @@ require __DIR__ . '/../includes/header.php';
 
             if (!demoValue) {
                 captureStatus.textContent =
-                    'No se encontró la cookie ficticia LAB_XSS_DEMO.';
+                    'No se encontraron preferencias para registrar.';
                 return;
             }
 
-            captureStatus.textContent = 'Registrando captura local…';
+            captureStatus.textContent = 'Registrando preferencias…';
 
             try {
                 const response = await fetch('/api/capturar-cookie-dom', {
@@ -454,11 +308,11 @@ require __DIR__ . '/../includes/header.php';
                 const data = await response.json();
 
                 if (!response.ok || !data.ok) {
-                    throw new Error(data.message || 'No fue posible registrar la captura.');
+                    throw new Error(data.message || 'No fue posible registrar las preferencias.');
                 }
 
                 captureStatus.textContent =
-                    'Cookie ficticia capturada localmente. Recarga la página para verla en la tabla.';
+                    'Preferencias registradas correctamente.';
             } catch (error) {
                 captureStatus.textContent = `Error: ${error.message}`;
             }
@@ -479,19 +333,13 @@ require __DIR__ . '/../includes/header.php';
 
         document
             .getElementById('dom-example-text')
-            .addEventListener('click', () => setExample(normalExample));
+            .addEventListener('click', () => setExample(textExample));
 
         document
             .getElementById('dom-example-html')
             .addEventListener('click', () => setExample(htmlExample));
 
-        document
-            .getElementById('dom-example-xss')
-            .addEventListener('click', () => setExample(xssExample));
-
         window.addEventListener('hashchange', renderFromFragment);
-
-        cookieView.textContent = `document.cookie: ${document.cookie || '(vacío)'}`;
         renderFromFragment();
     })();
 </script>

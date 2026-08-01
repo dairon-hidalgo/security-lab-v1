@@ -9,28 +9,28 @@ require_login();
 $user = current_user();
 $config = app_config();
 
-$pageTitle = 'Ficha de hallazgo';
-$activeUrl = '/informes/hallazgo';
-$pageHeading = 'Ficha de hallazgo';
-$pageSubtitle = 'Registro técnico de cada hallazgo';
+$pageTitle = 'Reporte de incidencia';
+$activeUrl = '/informes/reporte';
+$pageHeading = 'Reporte de incidencia';
+$pageSubtitle = 'Registro oficial de incidencias del servicio';
 $environmentLabel = 'Administración';
 
 require __DIR__ . '/../includes/header.php';
 ?>
 
 <style>
-    .evidence-content {
+    .report-content {
         max-width: 960px;
     }
 
-    .evidence-document {
+    .report-document {
         overflow: hidden;
         border: 1px solid var(--border);
         border-radius: 16px;
         background: var(--surface);
     }
 
-    .evidence-document-header {
+    .report-document-header {
         display: flex;
         align-items: center;
         gap: 18px;
@@ -39,23 +39,23 @@ require __DIR__ . '/../includes/header.php';
         background: var(--surface-soft);
     }
 
-    .evidence-document-header img {
+    .report-document-header img {
         width: 52px;
         height: 52px;
     }
 
-    .evidence-document-header span {
+    .report-document-header span {
         display: block;
         color: var(--text-soft);
         font-size: 13px;
     }
 
-    .evidence-document-header h1 {
+    .report-document-header h1 {
         margin: 2px 0 0;
         font-size: 24px;
     }
 
-    .evidence-document-code {
+    .report-document-code {
         margin-left: auto;
         padding: 9px 14px;
         border: 1px dashed var(--accent-500);
@@ -65,28 +65,28 @@ require __DIR__ . '/../includes/header.php';
         letter-spacing: .05em;
     }
 
-    .evidence-section {
+    .report-section {
         padding: 24px 30px;
         border-bottom: 1px solid var(--border);
     }
 
-    .evidence-section h2 {
+    .report-section h2 {
         margin: 0 0 18px;
         font-size: 16px;
         color: var(--text-soft);
     }
 
-    .evidence-grid {
+    .report-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 16px;
     }
 
-    .evidence-input {
+    .report-input {
         margin-top: 6px;
     }
 
-    .evidence-section textarea {
+    .report-section textarea {
         width: 100%;
         padding: 12px 14px;
         resize: vertical;
@@ -97,12 +97,12 @@ require __DIR__ . '/../includes/header.php';
         font: inherit;
     }
 
-    .evidence-section textarea:focus {
+    .report-section textarea:focus {
         outline: 3px solid color-mix(in srgb, var(--accent-500) 20%, transparent);
         border-color: var(--accent-500);
     }
 
-    .evidence-actions {
+    .report-actions {
         display: flex;
         justify-content: flex-end;
         gap: 10px;
@@ -121,7 +121,7 @@ require __DIR__ . '/../includes/header.php';
     }
 
     @media (max-width: 640px) {
-        .evidence-grid {
+        .report-grid {
             grid-template-columns: 1fr;
         }
     }
@@ -130,36 +130,36 @@ require __DIR__ . '/../includes/header.php';
 <div class="breadcrumb">
     <a href="/panel">Panel</a>
     <span>/</span>
-    <span>Ficha de hallazgo</span>
+    <span>Reporte de incidencia</span>
 </div>
 
-<main class="content evidence-content">
-    <section class="evidence-document">
-        <header class="evidence-document-header">
+<main class="content report-content">
+    <section class="report-document">
+        <header class="report-document-header">
             <img src="/assets/logo.svg" alt="Service Desk FIIS">
 
             <div>
-                <span>Ficha técnica de prueba</span>
-                <h1>Registro de hallazgo</h1>
+                <span>Mesa de servicio FIIS</span>
+                <h1>Informe de incidencia</h1>
             </div>
 
-            <div class="evidence-document-code">
-                V1-SEC
+            <div class="report-document-code">
+                REP-FIIS
             </div>
         </header>
 
-        <form id="evidenceForm">
-            <section class="evidence-section">
+        <form id="reportForm">
+            <section class="report-section">
                 <h2>1. Identificación</h2>
 
-                <div class="evidence-grid">
+                <div class="report-grid">
                     <div class="form-group">
-                        <label for="module">Área evaluada</label>
+                        <label for="module">Área del servicio</label>
 
                         <select
                             id="module"
                             name="module"
-                            class="input-control evidence-input"
+                            class="input-control report-input"
                         >
                             <?php foreach ($config['scenarios'] as $area => $description): ?>
                                 <option value="<?= htmlspecialchars($area . ' - ' . $description) ?>">
@@ -173,7 +173,7 @@ require __DIR__ . '/../includes/header.php';
                         <label for="date">Fecha y hora</label>
 
                         <input
-                            class="input-control evidence-input"
+                            class="input-control report-input"
                             type="datetime-local"
                             id="date"
                             name="date"
@@ -181,10 +181,10 @@ require __DIR__ . '/../includes/header.php';
                     </div>
 
                     <div class="form-group">
-                        <label for="responsible">Responsable</label>
+                        <label for="responsible">Solicitante</label>
 
                         <input
-                            class="input-control evidence-input"
+                            class="input-control report-input"
                             type="text"
                             id="responsible"
                             name="responsible"
@@ -195,45 +195,45 @@ require __DIR__ . '/../includes/header.php';
                     </div>
 
                     <div class="form-group">
-                        <label for="tool">Herramienta utilizada</label>
+                        <label for="tool">Canal de reporte</label>
 
                         <input
-                            class="input-control evidence-input"
+                            class="input-control report-input"
                             type="text"
                             id="tool"
                             name="tool"
-                            placeholder="Ejemplo: navegador, Burp Suite o ZAP"
+                            placeholder="Ejemplo: teléfono, correo o portal"
                         >
                     </div>
                 </div>
             </section>
 
-            <section class="evidence-section">
-                <h2>2. Datos de la prueba</h2>
+            <section class="report-section">
+                <h2>2. Descripción</h2>
 
                 <div class="form-group">
-                    <label for="objective">Objetivo</label>
+                    <label for="objective">Asunto</label>
 
                     <textarea
                         id="objective"
                         name="objective"
                         rows="3"
-                        placeholder="Describe qué se desea comprobar."
+                        placeholder="Resumen breve de la incidencia."
                     ></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="procedure">Procedimiento ejecutado</label>
+                    <label for="procedure">Descripción del problema</label>
 
                     <textarea
                         id="procedure"
                         name="procedure"
                         rows="5"
-                        placeholder="Registra de manera ordenada los pasos realizados."
+                        placeholder="Detalla los pasos y el comportamiento observado."
                     ></textarea>
                 </div>
 
-                <div class="evidence-grid">
+                <div class="report-grid">
                     <div class="form-group">
                         <label for="expected">Resultado esperado</label>
 
@@ -245,7 +245,7 @@ require __DIR__ . '/../includes/header.php';
                     </div>
 
                     <div class="form-group">
-                        <label for="obtained">Resultado obtenido</label>
+                        <label for="obtained">Resultado observado</label>
 
                         <textarea
                             id="obtained"
@@ -256,19 +256,19 @@ require __DIR__ . '/../includes/header.php';
                 </div>
             </section>
 
-            <section class="evidence-section">
-                <h2>3. Evidencias y conclusión</h2>
+            <section class="report-section">
+                <h2>3. Resolución</h2>
 
                 <div class="form-group">
                     <label for="screenshots">
-                        Capturas o archivos relacionados
+                        Archivos adjuntos o capturas
                     </label>
 
                     <textarea
                         id="screenshots"
                         name="screenshots"
                         rows="3"
-                        placeholder="Ejemplo: evidencia-01-login.png"
+                        placeholder="Ejemplo: captura-pantalla.png"
                     ></textarea>
                 </div>
 
@@ -282,48 +282,40 @@ require __DIR__ . '/../includes/header.php';
                     ></textarea>
                 </div>
 
-                <div class="evidence-grid">
+                <div class="report-grid">
                     <div class="form-group">
-                        <label for="result">Resultado final</label>
+                        <label for="result">Estado final</label>
 
                         <select
                             id="result"
                             name="result"
-                            class="input-control evidence-input"
+                            class="input-control report-input"
                         >
-                            <option value="Hallazgo confirmado">
-                                Hallazgo confirmado
-                            </option>
+                            <option value="Resuelto">Resuelto</option>
 
-                            <option value="Prueba inconclusa">
-                                Prueba inconclusa
-                            </option>
+                            <option value="En proceso">En proceso</option>
 
-                            <option value="No reproducido">
-                                No reproducido
-                            </option>
+                            <option value="No aplica">No aplica</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="severity">Severidad observada</label>
+                        <label for="severity">Prioridad</label>
 
                         <select
                             id="severity"
                             name="severity"
-                            class="input-control evidence-input"
+                            class="input-control report-input"
                         >
-                            <option value="Crítica">Crítica</option>
                             <option value="Alta">Alta</option>
                             <option value="Media">Media</option>
                             <option value="Baja">Baja</option>
-                            <option value="Informativa">Informativa</option>
                         </select>
                     </div>
                 </div>
             </section>
 
-            <div class="evidence-actions no-print">
+            <div class="report-actions no-print">
                 <button
                     type="button"
                     class="back-button"
@@ -342,10 +334,10 @@ require __DIR__ . '/../includes/header.php';
 
                 <button
                     type="button"
-                    class="primary-button evidence-print-button"
-                    id="printEvidence"
+                    class="primary-button report-print-button"
+                    id="printReport"
                 >
-                    Imprimir ficha
+                    Imprimir informe
                 </button>
             </div>
         </form>
@@ -353,16 +345,16 @@ require __DIR__ . '/../includes/header.php';
 </main>
 
 <script>
-    const evidenceForm = document.getElementById('evidenceForm');
-    const storageKey = 'fiisSecurityEvidenceDraft';
+    const reportForm = document.getElementById('reportForm');
+    const storageKey = 'fiisIncidentReportDraft';
 
     function getFormData() {
-        return Object.fromEntries(new FormData(evidenceForm).entries());
+        return Object.fromEntries(new FormData(reportForm).entries());
     }
 
     function applyFormData(data) {
         Object.entries(data).forEach(([name, value]) => {
-            const field = evidenceForm.elements.namedItem(name);
+            const field = reportForm.elements.namedItem(name);
 
             if (field) {
                 field.value = value;
@@ -381,19 +373,19 @@ require __DIR__ . '/../includes/header.php';
 
     document.getElementById('clearDraft').addEventListener('click', () => {
         const confirmation = window.confirm(
-            '¿Deseas limpiar toda la ficha de hallazgo?'
+            '¿Deseas limpiar el informe?'
         );
 
         if (!confirmation) {
             return;
         }
 
-        evidenceForm.reset();
+        reportForm.reset();
         localStorage.removeItem(storageKey);
-        showToast('Ficha limpiada', 'info');
+        showToast('Informe limpiado', 'info');
     });
 
-    document.getElementById('printEvidence').addEventListener('click', () => {
+    document.getElementById('printReport').addEventListener('click', () => {
         window.print();
     });
 

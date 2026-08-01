@@ -32,7 +32,7 @@ if (
     )
 ) {
     $errorMessage =
-        'La demostración remota está limitada al servicio interno rfi-source.';
+        'La fuente remota solicitada no está autorizada.';
 } else {
     ob_start();
 
@@ -148,8 +148,7 @@ require __DIR__ . '/../includes/header.php';
     <h1>Visor de recursos internos</h1>
 
     <p>
-        Permite cargar secciones de ayuda, manuales o fuentes internas
-        del equipo de soporte.
+        Permite visualizar secciones de ayuda y manuales del equipo de soporte.
     </p>
 </section>
 
@@ -160,7 +159,7 @@ require __DIR__ . '/../includes/header.php';
                 <h2>Seleccionar recurso</h2>
 
                 <p>
-                    Carga una sección local o una fuente interna.
+                    Selecciona una sección de documentación para visualizarla.
                 </p>
             </div>
         </div>
@@ -168,7 +167,7 @@ require __DIR__ . '/../includes/header.php';
         <form method="get" action="/soporte/documentacion">
             <div class="form-group">
                 <label for="page">
-                    Ruta o recurso
+                    Recurso a cargar
                 </label>
 
                 <input
@@ -182,7 +181,7 @@ require __DIR__ . '/../includes/header.php';
             </div>
 
             <button type="submit" class="primary-button">
-                Incluir recurso
+                Cargar contenido
                 <span>→</span>
             </button>
         </form>
@@ -199,7 +198,7 @@ require __DIR__ . '/../includes/header.php';
         <?php if ($wasSuccessful): ?>
             <section class="include-result">
                 <div class="include-result-header">
-                    <strong>Contenido incluido</strong>
+                    <strong>Contenido cargado</strong>
 
                     <span class="status-badge status-implemented">
                         <?= htmlspecialchars($resourceType) ?>
@@ -232,22 +231,6 @@ require __DIR__ . '/../includes/header.php';
                 <strong>Centro de ayuda</strong>
                 <code>../pages/help.php</code>
             </a>
-
-            <a
-                href="/soporte/documentacion?page=/etc/hostname"
-                class="include-example"
-            >
-                <strong>Archivo del servidor</strong>
-                <code>/etc/hostname</code>
-            </a>
-
-            <a
-                href="/soporte/documentacion?page=http://rfi-source/remote-note.txt"
-                class="include-example"
-            >
-                <strong>Fuente remota interna</strong>
-                <code>http://rfi-source/remote-note.txt</code>
-            </a>
         </div>
 
         <hr
@@ -260,7 +243,7 @@ require __DIR__ . '/../includes/header.php';
 
         <table class="info-table">
             <tr>
-                <th>Tipo detectado</th>
+                <th>Origen</th>
                 <td><?= htmlspecialchars($resourceType) ?></td>
             </tr>
 
@@ -268,15 +251,10 @@ require __DIR__ . '/../includes/header.php';
                 <th>Resultado</th>
                 <td>
                     <?= $wasSuccessful
-                        ? 'Incluido'
-                        : 'No incluido'
+                        ? 'Cargado'
+                        : 'No disponible'
                     ?>
                 </td>
-            </tr>
-
-            <tr>
-                <th>Mecanismo</th>
-                <td><code>include</code></td>
             </tr>
         </table>
     </aside>
@@ -366,7 +344,7 @@ require __DIR__ . '/../includes/header.php';
                     <td>
                         <span class="<?= $success
                             ? 'status-badge status-implemented'
-                            : 'status-badge risk-critical'
+                            : 'status-badge badge-failed'
                         ?>">
                             <?= $success
                                 ? 'Correcto'

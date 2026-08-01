@@ -2,7 +2,7 @@
     <h3>Centro de ayuda FIIS</h3>
 
     <p>
-        Bienvenido al módulo de documentación del Service Desk.
+        Bienvenido al centro de documentación del Service Desk.
     </p>
 
     <p>

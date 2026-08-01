@@ -49,7 +49,7 @@ $sourceHash = substr((string) ($payload['sourceHash'] ?? ''), 0, 3000);
 $pageUrl = substr((string) ($payload['pageUrl'] ?? ''), 0, 1500);
 
 /*
- * El punto de captura acepta exclusivamente la cookie ficticia del sistema.
+ * Registro del valor de cookie enviado desde el contenido del navegador.
  */
 if (
     preg_match(
@@ -62,7 +62,7 @@ if (
 
     echo json_encode([
         'ok' => false,
-        'message' => 'Solo se admite la cookie ficticia LAB_XSS_DEMO.',
+        'message' => 'El valor de cookie enviado no es válido.',
     ]);
 
     exit;
@@ -126,6 +126,6 @@ try {
 
     echo json_encode([
         'ok' => false,
-        'message' => 'No fue posible registrar la evidencia local.',
+        'message' => 'No fue posible registrar el evento.',
     ]);
 }

@@ -11,7 +11,7 @@ $errors = [
     ],
     404 => [
         'title' => 'Página no encontrada',
-        'message' => 'La dirección solicitada no existe dentro del laboratorio.',
+        'message' => 'La dirección solicitada no existe en el sistema.',
     ],
     500 => [
         'title' => 'Error interno',
@@ -47,7 +47,7 @@ http_response_code($code);
 <main class="error-card">
     <img
         src="/assets/logo.svg"
-        alt="FIIS Security Lab"
+        alt="Service Desk FIIS"
         class="error-logo"
     >
 

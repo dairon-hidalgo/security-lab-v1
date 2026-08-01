@@ -71,7 +71,7 @@
     ensureSidebarOverlay();
 
     const firstDashboardVisit = sessionStorage.getItem(
-        "securityLabDashboardVisited"
+        "serviceDeskDashboardVisited"
     );
 
     if (
@@ -79,9 +79,9 @@
         firstDashboardVisit !== "true"
     ) {
         window.setTimeout(() => {
-            showToast("Laboratorio cargado correctamente", "success");
+            showToast("Servicio cargado correctamente", "success");
         }, 450);
 
-        sessionStorage.setItem("securityLabDashboardVisited", "true");
+        sessionStorage.setItem("serviceDeskDashboardVisited", "true");
     }
 })();

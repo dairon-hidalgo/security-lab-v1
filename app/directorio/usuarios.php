@@ -54,7 +54,7 @@ require __DIR__ . '/../includes/header.php';
                 <h2>Consulta por identificador</h2>
 
                 <p>
-                    El valor se incorpora directamente en la consulta.
+                    Ingresa el identificador del registro a consultar.
                 </p>
             </div>
         </div>
@@ -79,18 +79,6 @@ require __DIR__ . '/../includes/header.php';
                 <span>→</span>
             </button>
         </form>
-
-        <?php if ($sqlExecuted !== ''): ?>
-            <div style="margin-top: 24px;">
-                <h3>Consulta construida</h3>
-
-                <pre class="terminal-output"><code><?= htmlspecialchars(
-                    $sqlExecuted,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?></code></pre>
-            </div>
-        <?php endif; ?>
 
         <?php if ($errorMessage !== null): ?>
             <div class="alert alert-error" style="margin-top: 20px;">
@@ -146,12 +134,12 @@ require __DIR__ . '/../includes/header.php';
 
             <div class="status-item">
                 <span class="status-circle">2</span>
-                Construcción de la consulta
+                Validación del parámetro
             </div>
 
             <div class="status-item">
                 <span class="status-circle">3</span>
-                Consulta enviada a PostgreSQL
+                Consulta al directorio
             </div>
 
             <div class="status-item">
@@ -162,7 +150,7 @@ require __DIR__ . '/../includes/header.php';
 
         <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
 
-        <h3>Punto de consulta</h3>
+        <h3>Datos de la consulta</h3>
 
         <table class="info-table">
             <tr>

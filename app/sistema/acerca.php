@@ -53,7 +53,7 @@ require __DIR__ . '/../includes/header.php';
         </span>
 
         <strong>PHP 8.2</strong>
-        <p>Lógica del servidor y módulos web.</p>
+        <p>Lógica del servidor y vistas de la interfaz.</p>
     </article>
 
     <article class="project-summary-card">

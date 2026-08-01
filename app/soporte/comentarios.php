@@ -20,18 +20,6 @@ $pdo->exec(
     )'
 );
 
-$pdo->exec(
-    'CREATE TABLE IF NOT EXISTS xss_cookie_captures (
-        id SERIAL PRIMARY KEY,
-        captured_by_user_id INTEGER REFERENCES users(id),
-        cookie_name VARCHAR(100) NOT NULL,
-        cookie_value TEXT NOT NULL,
-        page_url TEXT,
-        ip_address VARCHAR(64),
-        captured_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )'
-);
-
 if (!isset($_COOKIE['LAB_XSS_DEMO'])) {
     setcookie(
         'LAB_XSS_DEMO',
@@ -86,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'reset' && (string) ($user['role'] ?? '') === 'admin') {
-        $pdo->exec('TRUNCATE TABLE xss_cookie_captures RESTART IDENTITY');
         $pdo->exec('TRUNCATE TABLE xss_stored_comments RESTART IDENTITY');
         header('Location: /soporte/comentarios?reset=1');
         exit;
@@ -99,7 +86,7 @@ if (isset($_GET['saved'])) {
 }
 
 if (isset($_GET['reset'])) {
-    $message = 'Comentarios y capturas de demostración eliminados.';
+    $message = 'Los comentarios registrados fueron eliminados.';
     $messageClass = 'status-note status-note-success';
 }
 
@@ -108,21 +95,6 @@ $comments = $pdo->query(
      FROM xss_stored_comments
      ORDER BY created_at DESC, id DESC
      LIMIT 20'
-)->fetchAll();
-
-$captures = $pdo->query(
-    'SELECT
-        xss_cookie_captures.cookie_name,
-        xss_cookie_captures.cookie_value,
-        xss_cookie_captures.page_url,
-        xss_cookie_captures.ip_address,
-        xss_cookie_captures.captured_at,
-        users.username
-     FROM xss_cookie_captures
-     LEFT JOIN users
-        ON users.id = xss_cookie_captures.captured_by_user_id
-     ORDER BY xss_cookie_captures.captured_at DESC
-     LIMIT 10'
 )->fetchAll();
 
 $pageTitle = 'Comentarios';
@@ -150,32 +122,6 @@ require __DIR__ . '/../includes/header.php';
     .stored-form textarea:focus {
         outline: 3px solid color-mix(in srgb, var(--accent-500) 20%, transparent);
         border-color: var(--accent-500);
-    }
-
-    .stored-example-list {
-        display: grid;
-        gap: 10px;
-    }
-
-    .stored-example-button {
-        width: 100%;
-        padding: 13px 14px;
-        border: 1px solid var(--border);
-        border-radius: 11px;
-        background: var(--surface-soft);
-        color: var(--text);
-        font: inherit;
-        text-align: left;
-        cursor: pointer;
-    }
-
-    .stored-example-button strong,
-    .stored-example-button code {
-        display: block;
-    }
-
-    .stored-example-button strong {
-        margin-bottom: 5px;
     }
 
     .stored-comments {
@@ -206,23 +152,6 @@ require __DIR__ . '/../includes/header.php';
         min-height: 70px;
         padding: 18px;
         overflow-wrap: anywhere;
-    }
-
-    .stored-proof {
-        margin-top: 18px;
-        padding: 14px 16px;
-        border: 1px dashed var(--accent-500);
-        border-radius: 10px;
-        background: var(--surface-soft);
-        color: var(--text-soft);
-        font-size: 13px;
-    }
-
-    .capture-value {
-        max-width: 330px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
     }
 
     .status-note {
@@ -272,11 +201,11 @@ require __DIR__ . '/../includes/header.php';
 <section class="module-hero">
     <div class="module-hero-number">ATENCIÓN AL USUARIO</div>
 
-    <h1>Contenido persistente ejecutado al visitar la página</h1>
+    <h1>Comentarios del servicio</h1>
 
     <p>
-        Los comentarios se guardan en PostgreSQL y posteriormente se insertan
-        en el HTML sin codificación ni sanitización.
+        Espacio para el seguimiento de las solicitudes atendidas por la
+        mesa de servicio.
     </p>
 </section>
 
@@ -325,7 +254,7 @@ require __DIR__ . '/../includes/header.php';
                         name="action"
                         value="reset"
                         formnovalidate
-                        onclick="return confirm('¿Eliminar los comentarios y capturas de demostración?')"
+                        onclick="return confirm('¿Eliminar los comentarios registrados?')"
                     >
                         Limpiar registros
                     </button>
@@ -333,17 +262,13 @@ require __DIR__ . '/../includes/header.php';
             </div>
         </form>
 
-        <div class="stored-proof" id="stored-proof">
-            Estado de comprobación: todavía no se ha ejecutado el contenido almacenado de demostración.
-        </div>
-
         <div style="margin-top: 26px;">
             <div class="section-heading">
                 <div>
                     <h2>Comentarios almacenados</h2>
 
                     <p>
-                        Cada cuerpo se imprime deliberadamente sin <code>htmlspecialchars()</code>.
+                        Comentarios publicados por los usuarios del servicio.
                     </p>
                 </div>
             </div>
@@ -371,7 +296,7 @@ require __DIR__ . '/../includes/header.php';
                         <div class="stored-comment-body">
                             <?php
                             /*
-                             * Contenido persistente renderizado sin codificación.
+                             * Renderizado del cuerpo del comentario.
                              */
                             echo (string) $comment['content'];
                             ?>
@@ -383,101 +308,44 @@ require __DIR__ . '/../includes/header.php';
     </article>
 
     <aside class="module-status-card">
-        <h3>Ejemplos de contenido</h3>
+        <h3>Información</h3>
 
-        <div class="stored-example-list">
-            <button
-                class="stored-example-button"
-                type="button"
-                data-stored-example="Comentario normal para el historial del ticket."
-            >
-                <strong>Texto normal</strong>
-                <code>Comentario normal...</code>
-            </button>
+        <div class="status-list">
+            <div class="status-item">
+                <span class="status-circle">1</span>
+                Publicación vía formulario
+            </div>
 
-            <button
-                class="stored-example-button"
-                type="button"
-                data-stored-example="&lt;strong&gt;Comentario HTML persistente&lt;/strong&gt;"
-            >
-                <strong>HTML persistente</strong>
-                <code>&lt;strong&gt;...&lt;/strong&gt;</code>
-            </button>
+            <div class="status-item">
+                <span class="status-circle">2</span>
+                Almacenamiento en PostgreSQL
+            </div>
 
-            <button
-                class="stored-example-button"
-                type="button"
-                data-stored-example="&lt;img src=x onerror=&quot;(()=>{const item=document.cookie.split('; ').find(v=>v.startsWith('LAB_XSS_DEMO='))||'LAB_XSS_DEMO=(no encontrada)';fetch('/api/capturar-cookie',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'cookie='+encodeURIComponent(item)+'&amp;page='+encodeURIComponent(location.href)}).then(()=>{const p=document.getElementById('stored-proof');if(p){p.textContent='Cookie ficticia capturada localmente mediante contenido persistente';}});this.remove();})()&quot;&gt;"
-            >
-                <strong>Captura local de cookie ficticia</strong>
-                <code>&lt;img src=x onerror=...&gt;</code>
-            </button>
+            <div class="status-item">
+                <span class="status-circle">3</span>
+                Moderación por administradores
+            </div>
         </div>
 
         <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
-
-        <h3>Punto de prueba</h3>
 
         <table class="info-table">
-            <tr><th>Método</th><td>POST</td></tr>
-            <tr><th>Campo</th><td><code>content</code></td></tr>
-            <tr><th>Persistencia</th><td>PostgreSQL</td></tr>
-            <tr><th>Salida</th><td>Sin codificación</td></tr>
+            <tr>
+                <th>Método</th>
+                <td>POST</td>
+            </tr>
+
+            <tr>
+                <th>Campo</th>
+                <td><code>content</code></td>
+            </tr>
+
+            <tr>
+                <th>Persistencia</th>
+                <td>PostgreSQL</td>
+            </tr>
         </table>
-
-        <hr style="margin: 22px 0; border: 0; border-top: 1px solid var(--border);">
-
-        <h3>Capturas locales</h3>
-
-        <div class="project-module-table-wrapper">
-            <table class="info-table">
-                <thead>
-                <tr>
-                    <th>Usuario</th>
-                    <th>Cookie</th>
-                    <th>Fecha</th>
-                </tr>
-                </thead>
-
-                <tbody>
-                <?php if ($captures === []): ?>
-                    <tr>
-                        <td colspan="3">Sin capturas registradas.</td>
-                    </tr>
-                <?php endif; ?>
-
-                <?php foreach ($captures as $capture): ?>
-                    <tr>
-                        <td><?= htmlspecialchars((string) ($capture['username'] ?? 'desconocido')) ?></td>
-
-                        <td
-                            class="capture-value"
-                            title="<?= htmlspecialchars((string) $capture['cookie_value'], ENT_QUOTES, 'UTF-8') ?>"
-                        >
-                            <code>
-                                <?= htmlspecialchars((string) $capture['cookie_name']) ?>=
-                                <?= htmlspecialchars((string) $capture['cookie_value']) ?>
-                            </code>
-                        </td>
-
-                        <td><?= htmlspecialchars((string) $capture['captured_at']) ?></td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
     </aside>
 </section>
-
-<script>
-    const storedInput = document.getElementById('content');
-
-    document.querySelectorAll('[data-stored-example]').forEach((button) => {
-        button.addEventListener('click', () => {
-            storedInput.value = button.dataset.storedExample || '';
-            storedInput.focus();
-        });
-    });
-</script>
 
 <?php require __DIR__ . '/../includes/footer.php'; ?>

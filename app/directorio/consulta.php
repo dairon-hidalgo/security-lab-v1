@@ -67,7 +67,7 @@ require __DIR__ . '/../includes/header.php';
                 <h2>Punto de consulta</h2>
 
                 <p>
-                    Endpoint con un parámetro GET de consulta directa.
+                    Servicio interno de consulta con un parámetro GET.
                 </p>
             </div>
         </div>
@@ -100,7 +100,7 @@ require __DIR__ . '/../includes/header.php';
         <?php endif; ?>
 
         <div style="margin-top: 24px;">
-            <h3>Respuesta del endpoint</h3>
+            <h3>Respuesta del servicio</h3>
 
             <pre class="terminal-output"><?= htmlspecialchars(
                 $responseText,

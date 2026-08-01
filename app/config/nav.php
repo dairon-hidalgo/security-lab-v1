@@ -88,8 +88,8 @@ return [
             'label' => 'Administración',
             'items' => [
                 [
-                    'label' => 'Ficha de hallazgo',
-                    'url' => '/informes/hallazgo',
+                    'label' => 'Reporte de incidencia',
+                    'url' => '/informes/reporte',
                     'icon' => 'shield',
                 ],
                 [

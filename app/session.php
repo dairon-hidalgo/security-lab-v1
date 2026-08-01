@@ -3,16 +3,11 @@
 declare(strict_types=1);
 
 /*
- * Configuración deliberadamente débil para la V1:
- * - Cookie sin Secure porque trabaja mediante HTTP.
- * - HttpOnly desactivado para las futuras prácticas XSS.
- * - Sin regeneración automática de sesión.
- *
- * Estas configuraciones deberán corregirse en la V2.
+ * Configuración de sesión del servicio de soporte.
  */
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_name('SECURITYLABSESSID');
+    session_name('FISSESSID');
 
     session_start([
         'cookie_lifetime' => 0,

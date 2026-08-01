@@ -197,7 +197,7 @@ require __DIR__ . '/../includes/header.php';
                         <td>
                             <span class="<?= $wasSuccessful
                                 ? 'status-badge status-implemented'
-                                : 'status-badge risk-critical'
+                                : 'status-badge badge-failed'
                             ?>">
                                 <?= $wasSuccessful
                                     ? 'Correcto'
@@ -224,7 +224,7 @@ require __DIR__ . '/../includes/header.php';
     </article>
 
     <aside class="module-status-card">
-        <h3>Usuarios más probados</h3>
+        <h3>Actividad por usuario</h3>
 
         <?php if ($topUsers === []): ?>
             <p>No existen registros todavía.</p>
@@ -264,18 +264,6 @@ require __DIR__ . '/../includes/header.php';
                 </span>
 
                 Usuarios distintos
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">∞</span>
-
-                Sin límite de intentos
-            </div>
-
-            <div class="status-item">
-                <span class="status-circle">0</span>
-
-                Sin bloqueo temporal
             </div>
 
             <div class="status-item">

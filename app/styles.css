@@ -1,5 +1,5 @@
 /* ======================================================
-   Service Desk FIIS · Security Lab V1
+   Service Desk FIIS
    Hoja de estilos: diseño sobrio, plano y funcional.
    Sin degradados, sin desenfoques, sin animaciones.
    ====================================================== */
@@ -276,71 +276,6 @@ code {
     border-color: #b7d9c2;
     background: var(--success-soft);
     color: var(--success);
-}
-
-.demo-area {
-    margin-top: 22px;
-    padding-top: 18px;
-    border-top: 1px solid var(--border-soft);
-}
-
-.demo-title {
-    margin-bottom: 10px;
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.demo-users {
-    display: grid;
-    gap: 7px;
-}
-
-.demo-user {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    width: 100%;
-    padding: 9px 11px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface-soft);
-    color: var(--text);
-    text-align: left;
-    cursor: pointer;
-}
-
-.demo-user:hover {
-    border-color: var(--primary);
-    background: var(--primary-soft);
-}
-
-.demo-user-info {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
-
-.demo-avatar {
-    display: grid;
-    width: 30px;
-    height: 30px;
-    place-items: center;
-    border-radius: 50%;
-    background: var(--primary-soft);
-    color: var(--primary-dark);
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.demo-user strong {
-    display: block;
-    font-size: 12px;
-}
-
-.demo-user small {
-    color: var(--text-muted);
 }
 
 .login-note {
@@ -794,7 +729,6 @@ code {
     background: var(--primary-soft);
 }
 
-.risk-badge,
 .status-badge {
     display: inline-flex;
     width: fit-content;
@@ -806,24 +740,9 @@ code {
     font-weight: 600;
 }
 
-.risk-critical {
+.badge-failed {
     background: var(--danger-soft);
     color: var(--danger);
-}
-
-.risk-high {
-    background: var(--warning-soft);
-    color: var(--warning);
-}
-
-.risk-medium {
-    background: #fff4d6;
-    color: #8a5a00;
-}
-
-.risk-info {
-    background: var(--info-soft);
-    color: var(--info);
 }
 
 .status-pending {
@@ -918,7 +837,7 @@ code {
 }
 
 /* ======================================================
-   MÓDULOS INTERNOS
+   COMPONENTES DE LA INTERFAZ
    ====================================================== */
 
 .breadcrumb {
@@ -970,7 +889,7 @@ code {
 
 .module-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr);
     gap: 18px;
 }
 
@@ -1478,7 +1397,7 @@ code {
 }
 
 /* ======================================================
-   EVIDENCIAS
+   INFORMES Y DOCUMENTOS
    ====================================================== */
 
 .evidence-content {

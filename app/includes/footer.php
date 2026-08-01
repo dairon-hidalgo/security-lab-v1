@@ -1,7 +1,7 @@
         </main>
 
         <footer class="footer">
-            Service Desk FIIS · Soporte y mesa de ayuda · PHP 8.2 · Apache · PostgreSQL 16
+            Service Desk FIIS
         </footer>
     </section>
 </div>

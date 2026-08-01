@@ -21,13 +21,13 @@ $rawCookie = trim((string) ($_POST['cookie'] ?? ''));
 $pageUrl = substr(trim((string) ($_POST['page'] ?? '')), 0, 1000);
 
 /*
- * El punto de captura acepta exclusivamente la cookie ficticia LAB_XSS_DEMO.
+ * Registro del valor de cookie enviado desde el contenido dinámico.
  */
 if (!preg_match('/^LAB_XSS_DEMO=([A-Za-z0-9._-]{1,200})$/', $rawCookie, $matches)) {
     http_response_code(422);
     echo json_encode([
         'ok' => false,
-        'message' => 'Solo se acepta la cookie ficticia LAB_XSS_DEMO',
+        'message' => 'El valor de cookie enviado no es válido.',
     ]);
     exit;
 }
@@ -70,5 +70,5 @@ $statement->execute([
 
 echo json_encode([
     'ok' => true,
-    'message' => 'Cookie ficticia registrada localmente',
+    'message' => 'Preferencias registradas correctamente',
 ]);

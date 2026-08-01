@@ -110,7 +110,7 @@ require __DIR__ . '/../includes/header.php';
 
             <div class="status-item">
                 <span class="status-circle">3</span>
-                Errores ocultos
+                Respuesta binaria
             </div>
 
             <div class="status-item">
@@ -125,11 +125,6 @@ require __DIR__ . '/../includes/header.php';
             <tr>
                 <th>Parámetro</th>
                 <td><code>id</code></td>
-            </tr>
-
-            <tr>
-                <th>Tipo</th>
-                <td>Boolean-based blind</td>
             </tr>
         </table>
     </aside>

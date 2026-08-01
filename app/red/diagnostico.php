@@ -148,7 +148,7 @@ require __DIR__ . '/../includes/header.php';
 
         <?php if ($executedCommand !== ''): ?>
             <div style="margin-top: 25px;">
-                <h3>Comando construido</h3>
+                <h3>Comando ejecutado</h3>
 
                 <pre class="terminal-output"><code><?= htmlspecialchars(
                     $executedCommand
@@ -180,7 +180,7 @@ require __DIR__ . '/../includes/header.php';
             <div class="status-item">
                 <span class="status-circle">2</span>
 
-                Construcción del comando
+                Preparación del comando
             </div>
 
             <div class="status-item">
@@ -201,11 +201,6 @@ require __DIR__ . '/../includes/header.php';
         <h3>Contexto</h3>
 
         <table class="info-table">
-            <tr>
-                <th>Usuario del sistema</th>
-                <td><code>www-data</code></td>
-            </tr>
-
             <tr>
                 <th>Servidor</th>
                 <td>Contenedor Linux</td>

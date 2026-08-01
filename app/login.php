@@ -22,11 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo = db();
 
         /*
-         * Debilidades intencionales de la V1:
-         * - Contraseñas almacenadas como texto plano.
-         * - Sin límite de intentos.
-         * - Sin bloqueo temporal.
-         * - Sin segundo factor.
+         * Verificación de credenciales contra el directorio de usuarios.
          */
 
         $statement = $pdo->prepare(

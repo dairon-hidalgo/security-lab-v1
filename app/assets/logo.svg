@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" role="img" aria-labelledby="title">
-  <title id="title">FIIS Security Lab</title>
+  <title id="title">Service Desk FIIS</title>
 
   <defs>
     <linearGradient id="shieldGradient" x1="0" y1="0" x2="1" y2="1">
@@ -43,7 +43,7 @@
     font-size="20"
     font-weight="700"
   >
-    FIIS Security Lab
+    Service Desk FIIS
   </text>
 
   <text
