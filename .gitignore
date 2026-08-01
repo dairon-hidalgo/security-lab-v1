@@ -1,0 +1,7 @@
+.env
+.vscode/
+.idea/
+*.log
+
+app/uploads/*
+!app/uploads/.gitkeep
