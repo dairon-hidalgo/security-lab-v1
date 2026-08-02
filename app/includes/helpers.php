@@ -51,7 +51,3 @@ function pg_boolean(mixed $value): bool
         || $value === 'true';
 }
 
-function environment_label(string $label = 'Entorno de soporte'): string
-{
-    return $label;
-}
