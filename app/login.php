@@ -154,46 +154,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="brand-name">FIIS Security Lab</div>
 
                 <div class="brand-subtitle">
-                    Service Desk · Versión segura
+                    Service Desk · Secure
                 </div>
             </div>
-        </div>
-
-        <div class="hero-content">
-            <div class="hero-chip">
-                <span class="hero-chip-dot"></span>
-                Entorno local activo
-            </div>
-
-            <h1>
-                Seguridad web aplicada en un escenario controlado.
-            </h1>
-
-            <p>
-                Laboratorio académico desarrollado con PHP 8.2,
-                Apache, PostgreSQL 16 y Docker Desktop.
-            </p>
-
-            <div class="hero-features">
-                <article class="hero-feature">
-                    <strong>PHP 8.2</strong>
-                    <span>Aplicación y lógica web</span>
-                </article>
-
-                <article class="hero-feature">
-                    <strong>PostgreSQL 16</strong>
-                    <span>Persistencia del laboratorio</span>
-                </article>
-
-                <article class="hero-feature">
-                    <strong>Docker</strong>
-                    <span>Despliegue reproducible</span>
-                </article>
-            </div>
-        </div>
-
-        <div class="hero-footer">
-            Uso exclusivamente académico · localhost · datos ficticios
         </div>
     </section>
 
@@ -212,10 +175,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span>Versión segura</span>
 
                 <h2>Iniciar sesión</h2>
-
-                <p>
-                    Utiliza una cuenta ficticia para ingresar al laboratorio.
-                </p>
             </div>
 
             <div class="login-card">
@@ -352,10 +311,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
-            <p class="login-note">
-                Aplicación reforzada para comparar los controles de seguridad.
-                No utilizar información real.
-            </p>
         </div>
     </section>
 </div>
