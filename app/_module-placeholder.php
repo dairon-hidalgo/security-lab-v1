@@ -34,7 +34,7 @@ $moduleIcon = $moduleIcon ?? 'shield';
 <body data-page="module-pending">
 <div class="app-shell">
     <aside class="sidebar">
-        <div class="sidebar-brand"><div class="sidebar-logo">FI</div><div><strong>Service Desk FIIS</strong><span>Security Lab · V1</span></div></div>
+        <div class="sidebar-brand"><div class="sidebar-logo">FI</div><div><strong>Service Desk FIIS</strong><span>Security Lab · V2</span></div></div>
         <div class="sidebar-section-title">Navegación</div>
         <nav class="sidebar-nav">
             <a class="sidebar-link" href="/dashboard.php"><span class="sidebar-link-icon"><?= icon('home', 18) ?></span>Panel principal</a>

@@ -33,7 +33,7 @@ $requestHeaders = [
 <body data-page="security-info">
 <div class="app-shell">
     <aside class="sidebar">
-        <div class="sidebar-brand"><div class="sidebar-logo">FI</div><div><strong>Service Desk FIIS</strong><span>Security Lab · V1</span></div></div>
+        <div class="sidebar-brand"><div class="sidebar-logo">FI</div><div><strong>Service Desk FIIS</strong><span>Security Lab · V2</span></div></div>
         <div class="sidebar-section-title">Navegación</div>
         <nav class="sidebar-nav"><a class="sidebar-link" href="/dashboard.php"><span class="sidebar-link-icon"><?= icon('home',18) ?></span>Panel principal</a><a class="sidebar-link active" href="/security-info.php"><span class="sidebar-link-icon"><?= icon('cookie',18) ?></span>Cabeceras y cookies</a></nav>
         <div class="sidebar-bottom"><div class="sidebar-user"><div class="sidebar-user-avatar"><?= htmlspecialchars($userInitials ?: 'U') ?></div><div><strong><?= htmlspecialchars((string)($user['full_name'] ?? 'Usuario')) ?></strong><span><?= htmlspecialchars((string)($user['role'] ?? 'user')) ?></span></div></div><a class="logout-link" href="/logout.php">Cerrar sesión</a></div>

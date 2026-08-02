@@ -38,7 +38,7 @@ $initial = strtoupper(
 
             <div>
                 <strong>Service Desk FIIS</strong>
-                <span>Security Lab · V1</span>
+                <span>Security Lab · V2</span>
             </div>
         </div>
 
@@ -211,7 +211,7 @@ $initial = strtoupper(
                     <h3>Alcance actual</h3>
 
                     <ul class="clean-list">
-                        <li>Desarrollo de la versión V1 vulnerable.</li>
+                        <li>Desarrollo de la versión V2 segura.</li>
                         <li>Ejecución únicamente en localhost.</li>
                         <li>Datos y credenciales completamente ficticios.</li>
                         <li>Documentación técnica y guía de pruebas.</li>

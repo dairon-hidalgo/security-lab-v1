@@ -25,7 +25,7 @@ $modules = [
         'number' => '01',
         'icon' => 'lock',
         'title' => 'Fuerza bruta',
-        'description' => 'Autenticación sin bloqueo temporal, límite de intentos ni segundo factor.',
+        'description' => 'Autenticación reforzada con bloqueo temporal, contraseñas protegidas y sesiones seguras.',
         'risk' => 'Alto',
         'risk_class' => 'risk-high',
         'status' => 'Implementado',
@@ -189,7 +189,7 @@ $progress = (int) round($totalProgress / count($modules));
 
             <div>
                 <strong>Service Desk FIIS</strong>
-                <span>Security Lab · V1</span>
+                <span>Security Lab · V2</span>
             </div>
         </div>
 
@@ -292,7 +292,7 @@ $progress = (int) round($totalProgress / count($modules));
                     <h1>Panel de control</h1>
 
                     <p>
-                        Administración del laboratorio académico
+                        Administración de la versión segura
                     </p>
                 </div>
             </div>
@@ -300,7 +300,7 @@ $progress = (int) round($totalProgress / count($modules));
             <div class="header-actions">
                 <div class="environment-badge">
                     <span class="environment-dot"></span>
-                    V1 vulnerable · localhost
+                    V2 segura · localhost
                 </div>
 
                 <button
@@ -333,7 +333,7 @@ $progress = (int) round($totalProgress / count($modules));
                     <p>
                         El entorno está preparado para desarrollar,
                         comprobar y documentar los escenarios de seguridad
-                        de la aplicación vulnerable.
+                        de la aplicación segura.
                     </p>
                 </div>
 
