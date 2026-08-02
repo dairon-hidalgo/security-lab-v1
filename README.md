@@ -21,10 +21,11 @@ Aplicación **deliberadamente vulnerable**
 ---
 
 ## Puesta en marcha
+´´
 Asegurarse de tener Docker Corriendo 
-Asegurarse de tener la env (por si acaso)
+Asegurarse de tener la env y revisar su contenido (por si acaso)
 Asegurarse de tener los puertos indicados libres (8081(v1) y 8082 (v2)), si no, cambiarlos en el env de cada versión por otros que SI estén libres 
-
+´´
 ```bash
 
 # Levantar todos los servicios

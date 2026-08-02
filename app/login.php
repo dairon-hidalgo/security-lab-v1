@@ -97,20 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div>
                 <div class="brand-name">Service Desk FIIS</div>
 
-                <span class="brand-subtitle">
-                    Acceso al sistema
-                </span>
             </div>
         </div>
 
         <div class="login-heading">
-            <span>Acceso al sistema</span>
-
             <h2>Iniciar sesión</h2>
-
-            <p>
-                Ingresa con tu cuenta para acceder al panel.
-            </p>
         </div>
 
         <div class="login-card">
@@ -131,15 +122,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </label>
 
                     <div class="input-wrapper">
-                        <span class="input-icon">●</span>
-
                         <input
                             class="input-control"
                             type="text"
                             id="username"
                             name="username"
                             value="<?= htmlspecialchars($username) ?>"
-                            placeholder="Ingresa tu usuario"
                             required
                             autofocus
                         >
@@ -152,14 +140,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </label>
 
                     <div class="input-wrapper">
-                        <span class="input-icon">◆</span>
-
                         <input
                             class="input-control"
                             type="password"
                             id="password"
                             name="password"
-                            placeholder="Ingresa tu contraseña"
                             required
                         >
 
