@@ -1,4 +1,4 @@
-# Service Desk FIIS — Laboratorio de Seguridad V1
+# Service Desk FIIS - V1 (Insegura)
 
 Aplicación **deliberadamente vulnerable**
 ## Tabla de contenidos
@@ -44,6 +44,7 @@ docker compose ps
 
 CREDENCIALES 
 | Usuario    | Contraseña | Nombre             |
+|---|---|---|
 | `admin`    | `admin123` | Administrador FIIS 
 | `analista` | `fiis2026` | Analista de Soporte 
 | `usuario`  | `password` | Usuario de Prueba 
@@ -54,8 +55,8 @@ CREDENCIALES
 
 | Componente | Tecnología | Versión | Función |
 |---|---|---|---|
-| Runtime PHP | PHP + Apache | 8.2 / 2.4 | Servidor de aplicación web |
-| Base de datos | PostgreSQL | 16 | Almacenamiento relacional |
+| Runtime PHP | PHP + Apache | 8.2 / 2.4 | Aplicación web |
+| Base de datos | PostgreSQL | 16 | Almacenamiento |
 | Servidor estático | Nginx | Alpine | Fuente de archivos para RFI |
 | Orquestación | Docker Compose | v2+ | Despliegue multi-contenedor |
 | Host | Windows / Linux | — | Docker Desktop o Docker Engine |
@@ -95,7 +96,7 @@ CREDENCIALES
 │  │                                            └────────────────────┘    │   │
 │  └──────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
-│              Puerto expuesto al host: 8090 (solo la app)                    │
+│              Puerto expuesto al host: 8081                                  │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 Flujo de conexión:
@@ -115,9 +116,9 @@ security-lab-app (Apache + PHP)
 
 - **Aislamiento**: la BD y la fuente RFI no están expuestas al host; solo la
   app publica el puerto 8081.
-- **Persistencia**: los datos viven en un *named volume* (`postgres_data`),
+- **Persistencia en BD**: los datos viven en un *named volume* (`postgres_data`),
   osea que sobreviven a reinicios
-- **Edición rápida**: Para acelerar el proceso de edición, se ha optado por un bind mount `./app → /var/www/html`, el cual permite modificar
+- **Rápida Edición (Para nosotros)**: Para acelerar el proceso de edición, se ha optado por un bind mount `./app → /var/www/html`, el cual permite modificar
   código sin necesidad de reconstruir el contenedor
 - **DB levanta al iniciar**: los scripts `./database/*.sql` se ejecutan la
   primera vez que arranca la BD.
